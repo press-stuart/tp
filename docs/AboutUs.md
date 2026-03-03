@@ -48,12 +48,12 @@ You can reach us at the email `seer[at]comp.nus.edu.sg`
 * Role: Developer
 * Responsibilities: Dev Ops + Threading
 
-### James Doe
+### Beh Chuen Yang
 
-<img src="images/johndoe.png" width="200px">
+<img src="images/n00bcak.png" width="200px">
 
-[[github](http://github.com/johndoe)]
-[[portfolio](team/johndoe.md)]
+[[homepage](https://n00bcak.github.io)]
+[[github](http://github.com/N00bcak)]
 
 * Role: Developer
 * Responsibilities: UI
