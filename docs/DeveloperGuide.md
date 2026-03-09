@@ -444,11 +444,36 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 
 ### Non-Functional Requirements
 
-1.  Should work on any _mainstream OS_ as long as it has Java `17` or above installed.
-2.  Should be able to hold up to 1000 persons without a noticeable sluggishness in performance for typical usage.
-3.  A user with above average typing speed for regular English text (i.e. not code, not system admin commands) should be able to accomplish most of the tasks faster using commands than using the mouse.
+**Performance**
 
-*{More to be added}*
+1. The system should be able to handle up to 500 contacts without noticeable sluggishness during typical usage.
+2. Bulk operations involving up to 100 contacts should complete within 2 seconds.
+
+**Usability**
+
+3. The system should provide clear feedback messages after each command to confirm successful execution or explain errors.
+4. The system should be usable by a new user after reading the user guide once, without requiring external training.
+5. A user with above-average typing speed should be able to accomplish most tasks faster using commands than using a mouse-driven interface.
+
+**Reliability**
+
+6. The system should automatically persist data after each command to prevent data loss in the event of unexpected termination.
+7. If the data file becomes corrupted or invalid, the system should gracefully recover by resetting the data file or loading a safe default, instead of crashing.
+
+**Offline Operation**
+
+8. The system should function fully offline, without requiring any network connection during normal operation.
+9. All documentation required for operation (e.g., help guide) should be accessible locally without internet access.
+
+**Data Storage**
+
+10. Application data should be stored in a human-readable file format (e.g., JSON or similar) so that advanced users can inspect or modify it using external tools.
+11. The system should store all data locally on the user’s machine and must not depend on external databases or servers.
+
+**Portability**
+
+12. The application should work on any mainstream OS as long as Java 17 or above is installed.
+
 
 ### Glossary
 
