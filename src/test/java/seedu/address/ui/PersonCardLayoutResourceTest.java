@@ -23,11 +23,21 @@ public class PersonCardLayoutResourceTest {
     public void personListCardFxml_enablesWrappingForLongFields() throws IOException {
         String fxmlContent = readResourceContent(PERSON_CARD_FXML);
 
-        assertTrue(fxmlContent.contains("fx:id=\"name\" text=\"\\$first\" styleClass=\"cell_big_label\" wrapText=\"true\""));
-        assertTrue(fxmlContent.contains("fx:id=\"phone\" styleClass=\"cell_small_label\" text=\"\\$phone\" wrapText=\"true\""));
-        assertTrue(fxmlContent.contains("fx:id=\"address\" styleClass=\"cell_small_label\" text=\"\\$address\" wrapText=\"true\""));
-        assertTrue(fxmlContent.contains("fx:id=\"email\" styleClass=\"cell_small_label\" text=\"\\$email\" wrapText=\"true\""));
-        assertTrue(fxmlContent.contains("fx:id=\"tags\" prefWrapLength=\"240\""));
+        assertTrue(fxmlContent.contains(
+            "fx:id=\"name\" text=\"\\$first\" styleClass=\"cell_big_label\" wrapText=\"true\""
+        ));
+        assertTrue(fxmlContent.contains(
+            "fx:id=\"phone\" styleClass=\"cell_small_label\" text=\"\\$phone\" wrapText=\"true\""
+        ));
+        assertTrue(fxmlContent.contains(
+            "fx:id=\"address\" styleClass=\"cell_small_label\" text=\"\\$address\" wrapText=\"true\""
+        ));
+        assertTrue(fxmlContent.contains(
+            "fx:id=\"email\" styleClass=\"cell_small_label\" text=\"\\$email\" wrapText=\"true\""
+        ));
+        assertTrue(fxmlContent.contains(
+            "fx:id=\"tags\" prefWrapLength=\"240\""
+        ));
     }
 
     @Test
