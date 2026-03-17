@@ -1,6 +1,7 @@
 package seedu.address.logic.commands;
 
 import static java.util.Objects.requireNonNull;
+import static seedu.address.logic.parser.CliSyntax.PREFIX_MATCH_TYPE;
 
 import seedu.address.commons.util.ToStringBuilder;
 import seedu.address.logic.Messages;
@@ -18,9 +19,9 @@ public class FindCommand extends Command {
     public static final String MESSAGE_USAGE = COMMAND_WORD + ": Finds all persons whose fields contain any of "
             + "the specified keywords (case-insensitive) and displays them as a list with index numbers.\n"
             + "Searches across name, phone, email, address, role, notes, and tags.\n"
-            + "Parameters: [m/match_type] KEYWORD [MORE_KEYWORDS]...\n"
-            + "Valid match_type includes: keyword\n"
-            + "Example: " + COMMAND_WORD + " m/keyword alice bob charlie";
+            + "Parameters: [" + PREFIX_MATCH_TYPE + "/MATCH_TYPE] KEYWORD [MORE_KEYWORDS]...\n"
+            + "Valid MATCH_TYPE includes: keyword\n"
+            + "Example: " + COMMAND_WORD + " " + PREFIX_MATCH_TYPE + "/keyword alice bob charlie";
 
     private final PersonPredicate predicate;
 
