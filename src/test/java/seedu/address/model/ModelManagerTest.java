@@ -16,7 +16,9 @@ import org.junit.jupiter.api.Test;
 
 import seedu.address.commons.core.GuiSettings;
 import seedu.address.model.person.predicates.PersonContainsKeywordsPredicate;
+import seedu.address.model.person.Person;
 import seedu.address.testutil.AddressBookBuilder;
+import seedu.address.testutil.PersonBuilder;
 
 public class ModelManagerTest {
 
@@ -91,6 +93,28 @@ public class ModelManagerTest {
     @Test
     public void getFilteredPersonList_modifyList_throwsUnsupportedOperationException() {
         assertThrows(UnsupportedOperationException.class, () -> modelManager.getFilteredPersonList().remove(0));
+    }
+
+    @Test
+    public void updateFilteredPersonList_nullPredicate_throwsNullPointerException() {
+        assertThrows(NullPointerException.class, () -> modelManager.updateFilteredPersonList(null));
+    }
+
+    @Test
+    public void addPerson_filteredListResetsToShowAll() {
+        AddressBook addressBook = new AddressBookBuilder().withPerson(ALICE).withPerson(BENSON).build();
+        modelManager = new ModelManager(addressBook, new UserPrefs());
+        modelManager.updateFilteredPersonList(new PersonContainsKeywordsPredicate(
+                Arrays.asList("Alice")));
+
+        Person newPerson = new PersonBuilder().withName("Zack Lim")
+                .withPhone("90909090")
+                .withEmail("zack@example.com")
+                .withAddress("1 Sunset Way")
+                .build();
+        modelManager.addPerson(newPerson);
+
+        assertEquals(Arrays.asList(ALICE, BENSON, newPerson), modelManager.getFilteredPersonList());
     }
 
     @Test
