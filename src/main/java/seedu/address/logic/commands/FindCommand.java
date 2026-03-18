@@ -8,7 +8,7 @@ import static seedu.address.logic.parser.FindMatchType.SUBSTRING_TOKEN;
 import seedu.address.commons.util.ToStringBuilder;
 import seedu.address.logic.Messages;
 import seedu.address.model.Model;
-import seedu.address.model.person.predicate.PersonPredicate;
+import seedu.address.model.person.predicates.PersonPredicate;
 
 /**
  * Finds and lists all persons in address book whose fields contain any of the argument keywords.

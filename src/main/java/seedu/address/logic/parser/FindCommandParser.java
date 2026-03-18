@@ -9,7 +9,7 @@ import java.util.Optional;
 
 import seedu.address.logic.commands.FindCommand;
 import seedu.address.logic.parser.exceptions.ParseException;
-import seedu.address.model.person.predicate.PersonPredicate;
+import seedu.address.model.person.predicates.PersonPredicate;
 
 /**
  * Parses input arguments and creates a new FindCommand object

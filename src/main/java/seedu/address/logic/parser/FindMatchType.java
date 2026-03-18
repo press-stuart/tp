@@ -4,9 +4,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-import seedu.address.model.person.predicate.PersonContainsKeywordsPredicate;
-import seedu.address.model.person.predicate.PersonContainsSubstringsPredicate;
-import seedu.address.model.person.predicate.PersonPredicate;
+import seedu.address.model.person.predicates.PersonContainsKeywordsPredicate;
+import seedu.address.model.person.predicates.PersonContainsSubstringsPredicate;
+import seedu.address.model.person.predicates.PersonPredicate;
 
 /**
  * Supported match types for the find command.
