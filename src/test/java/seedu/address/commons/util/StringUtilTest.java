@@ -123,6 +123,13 @@ public class StringUtilTest {
         assertTrue(StringUtil.containsWordIgnoreCase("AAA bBb ccc  bbb", "bbB"));
     }
 
+    @Test
+    public void containsWordIgnoreCase_examplesFromJavadoc_correctResult() {
+        assertTrue(StringUtil.containsWordIgnoreCase("ABc def", "abc"));
+        assertTrue(StringUtil.containsWordIgnoreCase("ABc def", "DEF"));
+        assertFalse(StringUtil.containsWordIgnoreCase("ABc def", "AB")); // not a full word match
+    }
+
 
     //---------------- Tests for containsSubstringIgnoreCase --------------------------------------
 
@@ -164,6 +171,13 @@ public class StringUtilTest {
         assertTrue(StringUtil.containsSubstringIgnoreCase("  AAA   bBb   ccc  ", "bbb"));
         assertTrue(StringUtil.containsSubstringIgnoreCase("Aaa", "aa"));
         assertTrue(StringUtil.containsSubstringIgnoreCase("aaa bbb ccc", "  cC  "));
+    }
+
+    @Test
+    public void containsSubstringIgnoreCase_examplesFromJavadoc_correctResult() {
+        assertTrue(StringUtil.containsSubstringIgnoreCase("ABc def", "abc"));
+        assertTrue(StringUtil.containsSubstringIgnoreCase("ABc def", "B"));
+        assertFalse(StringUtil.containsSubstringIgnoreCase("ABc def", "ghi"));
     }
 
 
@@ -224,6 +238,13 @@ public class StringUtilTest {
         // Multiple edits required (kitten -> sitting)
         assertFalse(StringUtil.containsFuzzyWordIgnoreCase("kitten", "sitting", 2));
         assertTrue(StringUtil.containsFuzzyWordIgnoreCase("kitten", "sitting", 3));
+    }
+
+    @Test
+    public void containsFuzzyWordIgnoreCase_examplesFromJavadoc_correctResult() {
+        assertTrue(StringUtil.containsFuzzyWordIgnoreCase("ABc def", "abd", 1));
+        assertFalse(StringUtil.containsFuzzyWordIgnoreCase("ABc def", "ace", 1));
+        assertTrue(StringUtil.containsFuzzyWordIgnoreCase("ABc def", "DEF", 0));
     }
 
 

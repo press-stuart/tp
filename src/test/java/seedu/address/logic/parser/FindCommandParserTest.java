@@ -53,6 +53,29 @@ public class FindCommandParserTest {
     }
 
     @Test
+    public void parse_examplesFromDocumentation_returnsFindCommand() {
+        // FindCommand MESSAGE_USAGE examples
+        assertParseSuccess(parser, PREFIX_MATCH_TYPE + KEYWORD_TOKEN + " alice bob charlie",
+                new FindCommand(new PersonContainsKeywordsPredicate(Arrays.asList("alice", "bob", "charlie"))));
+        assertParseSuccess(parser, PREFIX_MATCH_TYPE + SUBSTRING_TOKEN + " ali",
+                new FindCommand(new PersonContainsSubstringsPredicate(Arrays.asList("ali"))));
+        assertParseSuccess(parser, PREFIX_MATCH_TYPE + FUZZY_TOKEN + " meyr",
+                new FindCommand(new PersonContainsFuzzyKeywordsPredicate(Arrays.asList("meyr"))));
+
+        // User Guide examples
+        assertParseSuccess(parser, "John",
+                new FindCommand(new PersonContainsKeywordsPredicate(Arrays.asList("John"))));
+        assertParseSuccess(parser, "alex david",
+                new FindCommand(new PersonContainsKeywordsPredicate(Arrays.asList("alex", "david"))));
+        assertParseSuccess(parser, PREFIX_MATCH_TYPE + KEYWORD_TOKEN + " John",
+                new FindCommand(new PersonContainsKeywordsPredicate(Arrays.asList("John"))));
+        assertParseSuccess(parser, PREFIX_MATCH_TYPE + SUBSTRING_TOKEN + " ali",
+                new FindCommand(new PersonContainsSubstringsPredicate(Arrays.asList("ali"))));
+        assertParseSuccess(parser, PREFIX_MATCH_TYPE + FUZZY_TOKEN + " michigan",
+                new FindCommand(new PersonContainsFuzzyKeywordsPredicate(Arrays.asList("michigan"))));
+    }
+
+    @Test
     public void parse_matchTypeNotFirstToken_throwsParseException() {
         assertParseFailure(parser, "Alice " + PREFIX_MATCH_TYPE + KEYWORD_TOKEN + " Bob",
                 String.format(MESSAGE_INVALID_COMMAND_FORMAT, FindCommand.MESSAGE_USAGE));

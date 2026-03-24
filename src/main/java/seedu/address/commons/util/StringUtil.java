@@ -65,7 +65,7 @@ public class StringUtil {
      *   Ignores case.
      *   <br>examples:<pre>
      *       containsFuzzyWordIgnoreCase("ABc def", "abd", 1) == true
-     *       containsFuzzyWordIgnoreCase("ABc def", "abe", 1) == false
+     *       containsFuzzyWordIgnoreCase("ABc def", "ace", 1) == false
      *       containsFuzzyWordIgnoreCase("ABc def", "DEF", 0) == true
      *       </pre>
      * @param sentence cannot be null
