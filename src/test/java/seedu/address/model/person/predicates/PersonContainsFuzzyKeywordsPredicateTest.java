@@ -44,9 +44,21 @@ public class PersonContainsFuzzyKeywordsPredicateTest {
 
     @Test
     public void test_fuzzyKeywordsMatchFields_returnsTrue() {
-        // Name keyword (single edit)
+        // Name keyword (no edit)
         PersonContainsFuzzyKeywordsPredicate predicate =
-                new PersonContainsFuzzyKeywordsPredicate(Collections.singletonList("Alic"));
+                new PersonContainsFuzzyKeywordsPredicate(Collections.singletonList("Alice"));
+        assertTrue(predicate.test(new PersonBuilder().withName("Alice Bob").build()));
+
+        // Name keyword (single insertion)
+        predicate = new PersonContainsFuzzyKeywordsPredicate(Collections.singletonList("Alicee"));
+        assertTrue(predicate.test(new PersonBuilder().withName("Alice Bob").build()));
+
+        // Name keyword (single deletion)
+        predicate = new PersonContainsFuzzyKeywordsPredicate(Collections.singletonList("Aice"));
+        assertTrue(predicate.test(new PersonBuilder().withName("Alice Bob").build()));
+
+        // Name keyword (single edit)
+        predicate = new PersonContainsFuzzyKeywordsPredicate(Collections.singletonList("Alic"));
         assertTrue(predicate.test(new PersonBuilder().withName("Alice Bob").build()));
 
         // Phone keyword (single edit)
