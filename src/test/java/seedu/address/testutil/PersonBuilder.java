@@ -2,6 +2,8 @@ package seedu.address.testutil;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import seedu.address.model.person.Address;
 import seedu.address.model.person.Email;
@@ -133,11 +135,33 @@ public class PersonBuilder {
     }
 
     /**
+     * Parses the {@code availabilities} into a {@code Set<VolunteerAvailability>}
+     * and set it to the {@code Person} that we are building.
+     */
+    public PersonBuilder withAvailabilities(String ... availabilities) {
+        this.availabilities = Stream.of(availabilities)
+                .map(VolunteerAvailability::fromString)
+                .collect(Collectors.toSet());
+        return this;
+    }
+
+    /**
      * Parses the {@code records} into a {@code Set<VolunteerRecord>} and set it to the
      * {@code Person} that we are building.
      */
     public PersonBuilder withRecords(VolunteerRecord ... records) {
         this.records = new HashSet<>(java.util.Arrays.asList(records));
+        return this;
+    }
+
+    /**
+     * Parses the {@code records} into a {@code Set<VolunteerRecord>} and set it to the
+     * {@code Person} that we are building.
+     */
+    public PersonBuilder withRecords(String ... records) {
+        this.records = Stream.of(records)
+                .map(VolunteerRecord::fromString)
+                .collect(Collectors.toSet());
         return this;
     }
 
