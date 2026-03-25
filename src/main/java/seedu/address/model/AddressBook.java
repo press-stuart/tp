@@ -3,19 +3,21 @@ package seedu.address.model;
 import static java.util.Objects.requireNonNull;
 
 import java.util.List;
+import java.util.Objects;
 
 import javafx.collections.ObservableList;
 import seedu.address.commons.util.ToStringBuilder;
+import seedu.address.model.person.DeletedPersonList;
 import seedu.address.model.person.Person;
 import seedu.address.model.person.UniquePersonList;
 
 /**
  * Wraps all data at the address-book level
- * Duplicates are not allowed (by .isSamePerson comparison)
  */
 public class AddressBook implements ReadOnlyAddressBook {
 
     private final UniquePersonList keptPersons;
+    private final DeletedPersonList deletedPersons;
 
     /*
      * The 'unusual' code block below is a non-static initialization block, sometimes used to avoid duplication
@@ -26,6 +28,7 @@ public class AddressBook implements ReadOnlyAddressBook {
      */
     {
         keptPersons = new UniquePersonList();
+        deletedPersons = new DeletedPersonList();
     }
 
     public AddressBook() {}
@@ -42,10 +45,18 @@ public class AddressBook implements ReadOnlyAddressBook {
 
     /**
      * Replaces the contents of the kept person list with {@code keptPersons}.
-     * {@code keptPersons} must not contain duplicate keptPersons.
+     * {@code keptPersons} must not contain duplicate persons with respect to identity fields.
      */
     public void setKeptPersons(List<Person> keptPersons) {
         this.keptPersons.setPersons(keptPersons);
+    }
+
+    /**
+     * Replaces the contents of the deleted person list with {@code deletedPersons}.
+     * {@code deletedPersons} must not contain duplicate persons with all fields equal.
+     */
+    public void setDeletedPersons(List<Person> deletedPersons) {
+        this.deletedPersons.setPersons(deletedPersons);
     }
 
     /**
@@ -55,6 +66,7 @@ public class AddressBook implements ReadOnlyAddressBook {
         requireNonNull(newData);
 
         setKeptPersons(newData.getKeptPersonList());
+        setDeletedPersons(newData.getDeletedPersonList());
     }
 
     //// person-level operations
@@ -94,18 +106,32 @@ public class AddressBook implements ReadOnlyAddressBook {
         keptPersons.remove(key);
     }
 
+    /**
+     * Adds a deleted person to the address book.
+     * The person must not already exist in the list of deleted persons.
+     */
+    public void addDeletedPerson(Person p) {
+        deletedPersons.add(p);
+    }
+
     //// util methods
 
     @Override
     public String toString() {
         return new ToStringBuilder(this)
                 .add("keptPersons", keptPersons)
+                .add("deletedPersons", deletedPersons)
                 .toString();
     }
 
     @Override
     public ObservableList<Person> getKeptPersonList() {
         return keptPersons.asUnmodifiableObservableList();
+    }
+
+    @Override
+    public ObservableList<Person> getDeletedPersonList() {
+        return deletedPersons.asUnmodifiableObservableList();
     }
 
     @Override
@@ -120,11 +146,12 @@ public class AddressBook implements ReadOnlyAddressBook {
         }
 
         AddressBook otherAddressBook = (AddressBook) other;
-        return keptPersons.equals(otherAddressBook.keptPersons);
+        return keptPersons.equals(otherAddressBook.keptPersons)
+                && deletedPersons.equals(otherAddressBook.deletedPersons);
     }
 
     @Override
     public int hashCode() {
-        return keptPersons.hashCode();
+        return Objects.hash(keptPersons, deletedPersons);
     }
 }

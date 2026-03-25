@@ -34,6 +34,12 @@ public class AddressBookTest {
     }
 
     @Test
+    public void constructor_withCopy() {
+        AddressBook addressBook = new AddressBook(getTypicalAddressBook());
+        assertEquals(getTypicalAddressBook(), addressBook);
+    }
+
+    @Test
     public void resetData_null_throwsNullPointerException() {
         assertThrows(NullPointerException.class, () -> addressBook.resetData(null));
     }
@@ -51,7 +57,7 @@ public class AddressBookTest {
         Person editedAlice = new PersonBuilder(ALICE).withAddress(VALID_ADDRESS_BOB).withTags(VALID_TAG_HUSBAND)
                 .build();
         List<Person> newPersons = Arrays.asList(ALICE, editedAlice);
-        AddressBookStub newData = new AddressBookStub(newPersons);
+        AddressBookStub newData = new AddressBookStub(newPersons, Collections.emptyList());
 
         assertThrows(DuplicatePersonException.class, () -> addressBook.resetData(newData));
     }
@@ -63,7 +69,7 @@ public class AddressBookTest {
                 .withEmail(ALICE.getEmail().value.toUpperCase())
                 .build();
         List<Person> newPersons = Arrays.asList(ALICE, duplicateByEmail);
-        AddressBookStub newData = new AddressBookStub(newPersons);
+        AddressBookStub newData = new AddressBookStub(newPersons, Collections.emptyList());
 
         assertThrows(DuplicatePersonException.class, () -> addressBook.resetData(newData));
     }
@@ -75,10 +81,18 @@ public class AddressBookTest {
                 .withEmail(VALID_EMAIL_AMY)
                 .build();
         List<Person> newPersons = Arrays.asList(ALICE, sameNameDifferentContacts);
-        AddressBookStub newData = new AddressBookStub(newPersons);
+        AddressBookStub newData = new AddressBookStub(newPersons, Collections.emptyList());
 
         addressBook.resetData(newData);
         assertEquals(newPersons, addressBook.getKeptPersonList());
+    }
+
+    @Test
+    public void resetData_withDuplicateDeletedPersons_throwsDuplicatePersonException() {
+        List<Person> newDeletedPersons = Arrays.asList(ALICE, ALICE);
+        AddressBookStub newData = new AddressBookStub(Collections.emptyList(), newDeletedPersons);
+
+        assertThrows(DuplicatePersonException.class, () -> addressBook.resetData(newData));
     }
 
     @Test
@@ -120,7 +134,8 @@ public class AddressBookTest {
     @Test
     public void toStringMethod() {
         String expected = AddressBook.class.getCanonicalName()
-                + "{keptPersons=" + addressBook.getKeptPersonList() + "}";
+                + "{keptPersons=" + addressBook.getKeptPersonList() + ", "
+                + "deletedPersons=" + addressBook.getDeletedPersonList() + "}";
         assertEquals(expected, addressBook.toString());
     }
 
@@ -128,15 +143,22 @@ public class AddressBookTest {
      * A stub ReadOnlyAddressBook whose persons list can violate interface constraints.
      */
     private static class AddressBookStub implements ReadOnlyAddressBook {
-        private final ObservableList<Person> persons = FXCollections.observableArrayList();
+        private final ObservableList<Person> keptPersons = FXCollections.observableArrayList();
+        private final ObservableList<Person> deletedPersons = FXCollections.observableArrayList();
 
-        AddressBookStub(Collection<Person> persons) {
-            this.persons.setAll(persons);
+        AddressBookStub(Collection<Person> keptPersons, Collection<Person> deletedPersons) {
+            this.keptPersons.setAll(keptPersons);
+            this.deletedPersons.setAll(deletedPersons);
         }
 
         @Override
         public ObservableList<Person> getKeptPersonList() {
-            return persons;
+            return keptPersons;
+        }
+
+        @Override
+        public ObservableList<Person> getDeletedPersonList() {
+            return deletedPersons;
         }
     }
 
