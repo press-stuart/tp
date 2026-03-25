@@ -15,7 +15,7 @@ import seedu.address.model.person.UniquePersonList;
  */
 public class AddressBook implements ReadOnlyAddressBook {
 
-    private final UniquePersonList persons;
+    private final UniquePersonList keptPersons;
 
     /*
      * The 'unusual' code block below is a non-static initialization block, sometimes used to avoid duplication
@@ -25,7 +25,7 @@ public class AddressBook implements ReadOnlyAddressBook {
      *   among constructors.
      */
     {
-        persons = new UniquePersonList();
+        keptPersons = new UniquePersonList();
     }
 
     public AddressBook() {}
@@ -41,11 +41,11 @@ public class AddressBook implements ReadOnlyAddressBook {
     //// list overwrite operations
 
     /**
-     * Replaces the contents of the person list with {@code persons}.
-     * {@code persons} must not contain duplicate persons.
+     * Replaces the contents of the kept person list with {@code keptPersons}.
+     * {@code keptPersons} must not contain duplicate keptPersons.
      */
-    public void setPersons(List<Person> persons) {
-        this.persons.setPersons(persons);
+    public void setKeptPersons(List<Person> keptPersons) {
+        this.keptPersons.setPersons(keptPersons);
     }
 
     /**
@@ -54,44 +54,44 @@ public class AddressBook implements ReadOnlyAddressBook {
     public void resetData(ReadOnlyAddressBook newData) {
         requireNonNull(newData);
 
-        setPersons(newData.getPersonList());
+        setKeptPersons(newData.getKeptPersonList());
     }
 
     //// person-level operations
 
     /**
-     * Returns true if a person with the same identity as {@code person} exists in the address book.
+     * Returns true if a person with the same identity as {@code person} exists in the list of kept persons.
      */
-    public boolean hasPerson(Person person) {
+    public boolean hasKeptPerson(Person person) {
         requireNonNull(person);
-        return persons.contains(person);
+        return keptPersons.contains(person);
     }
 
     /**
      * Adds a person to the address book.
-     * The person must not already exist in the address book.
+     * The person must not already exist in the list of kept persons.
      */
-    public void addPerson(Person p) {
-        persons.add(p);
+    public void addKeptPerson(Person p) {
+        keptPersons.add(p);
     }
 
     /**
-     * Replaces the given person {@code target} in the list with {@code editedPerson}.
-     * {@code target} must exist in the address book.
-     * The person identity of {@code editedPerson} must not be the same as another existing person in the address book.
+     * Replaces the given person {@code target} in the list of kept persons with {@code editedPerson}.
+     * {@code target} must exist in the list of kept persons.
+     * The person identity of {@code editedPerson} must not be the same as another existing person in the list.
      */
-    public void setPerson(Person target, Person editedPerson) {
+    public void setKeptPerson(Person target, Person editedPerson) {
         requireNonNull(editedPerson);
 
-        persons.setPerson(target, editedPerson);
+        keptPersons.setPerson(target, editedPerson);
     }
 
     /**
-     * Removes {@code key} from this {@code AddressBook}.
-     * {@code key} must exist in the address book.
+     * Removes {@code key} from the list of kept persons in this {@code AddressBook}.
+     * {@code key} must exist in the list of kept persons.
      */
-    public void removePerson(Person key) {
-        persons.remove(key);
+    public void removeKeptPerson(Person key) {
+        keptPersons.remove(key);
     }
 
     //// util methods
@@ -99,13 +99,13 @@ public class AddressBook implements ReadOnlyAddressBook {
     @Override
     public String toString() {
         return new ToStringBuilder(this)
-                .add("persons", persons)
+                .add("keptPersons", keptPersons)
                 .toString();
     }
 
     @Override
-    public ObservableList<Person> getPersonList() {
-        return persons.asUnmodifiableObservableList();
+    public ObservableList<Person> getKeptPersonList() {
+        return keptPersons.asUnmodifiableObservableList();
     }
 
     @Override
@@ -120,11 +120,11 @@ public class AddressBook implements ReadOnlyAddressBook {
         }
 
         AddressBook otherAddressBook = (AddressBook) other;
-        return persons.equals(otherAddressBook.persons);
+        return keptPersons.equals(otherAddressBook.keptPersons);
     }
 
     @Override
     public int hashCode() {
-        return persons.hashCode();
+        return keptPersons.hashCode();
     }
 }

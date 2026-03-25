@@ -45,7 +45,7 @@ public class JsonSerializableAddressBookTest {
                 JsonSerializableAddressBook.class).get();
         AddressBook addressBookFromFile = dataFromFile.toModelType();
         AddressBook expectedAddressBook = new AddressBook();
-        expectedAddressBook.addPerson(new PersonBuilder()
+        expectedAddressBook.addKeptPerson(new PersonBuilder()
                 .withName("Role Notes User")
                 .withPhone("81234567")
                 .withEmail("rolenotes@example.com")
@@ -93,7 +93,7 @@ public class JsonSerializableAddressBookTest {
         JsonSerializableAddressBook dataFromFile = JsonUtil.readJsonFile(SAME_NAME_DIFFERENT_CONTACTS_FILE,
                 JsonSerializableAddressBook.class).get();
         AddressBook addressBookFromFile = dataFromFile.toModelType();
-        assertEquals(2, addressBookFromFile.getPersonList().size());
+        assertEquals(2, addressBookFromFile.getKeptPersonList().size());
     }
 
 }

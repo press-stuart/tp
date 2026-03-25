@@ -30,7 +30,7 @@ public class AddressBookTest {
 
     @Test
     public void constructor() {
-        assertEquals(Collections.emptyList(), addressBook.getPersonList());
+        assertEquals(Collections.emptyList(), addressBook.getKeptPersonList());
     }
 
     @Test
@@ -78,48 +78,49 @@ public class AddressBookTest {
         AddressBookStub newData = new AddressBookStub(newPersons);
 
         addressBook.resetData(newData);
-        assertEquals(newPersons, addressBook.getPersonList());
+        assertEquals(newPersons, addressBook.getKeptPersonList());
     }
 
     @Test
-    public void hasPerson_nullPerson_throwsNullPointerException() {
-        assertThrows(NullPointerException.class, () -> addressBook.hasPerson(null));
+    public void hasKeptPerson_nullPerson_throwsNullPointerException() {
+        assertThrows(NullPointerException.class, () -> addressBook.hasKeptPerson(null));
     }
 
     @Test
-    public void hasPerson_personNotInAddressBook_returnsFalse() {
-        assertFalse(addressBook.hasPerson(ALICE));
+    public void hasKeptPerson_personNotInAddressBook_returnsFalse() {
+        assertFalse(addressBook.hasKeptPerson(ALICE));
     }
 
     @Test
-    public void hasPerson_personInAddressBook_returnsTrue() {
-        addressBook.addPerson(ALICE);
-        assertTrue(addressBook.hasPerson(ALICE));
+    public void hasKeptPerson_personInAddressBook_returnsTrue() {
+        addressBook.addKeptPerson(ALICE);
+        assertTrue(addressBook.hasKeptPerson(ALICE));
     }
 
     @Test
-    public void hasPerson_personWithSameIdentityFieldsInAddressBook_returnsTrue() {
-        addressBook.addPerson(ALICE);
+    public void hasKeptPerson_personWithSameIdentityFieldsInAddressBook_returnsTrue() {
+        addressBook.addKeptPerson(ALICE);
         Person editedAlice = new PersonBuilder(ALICE).withAddress(VALID_ADDRESS_BOB).withTags(VALID_TAG_HUSBAND)
                 .build();
-        assertTrue(addressBook.hasPerson(editedAlice));
+        assertTrue(addressBook.hasKeptPerson(editedAlice));
     }
 
     @Test
-    public void hasPerson_personWithSameNameButDifferentPhoneAndEmail_returnsFalse() {
-        addressBook.addPerson(ALICE);
+    public void hasKeptPerson_personWithSameNameButDifferentPhoneAndEmail_returnsFalse() {
+        addressBook.addKeptPerson(ALICE);
         Person editedAlice = new PersonBuilder(ALICE).withPhone(VALID_PHONE_AMY).withEmail(VALID_EMAIL_AMY).build();
-        assertFalse(addressBook.hasPerson(editedAlice));
+        assertFalse(addressBook.hasKeptPerson(editedAlice));
     }
 
     @Test
-    public void getPersonList_modifyList_throwsUnsupportedOperationException() {
-        assertThrows(UnsupportedOperationException.class, () -> addressBook.getPersonList().remove(0));
+    public void getKeptPersonList_modifyList_throwsUnsupportedOperationException() {
+        assertThrows(UnsupportedOperationException.class, () -> addressBook.getKeptPersonList().remove(0));
     }
 
     @Test
     public void toStringMethod() {
-        String expected = AddressBook.class.getCanonicalName() + "{persons=" + addressBook.getPersonList() + "}";
+        String expected = AddressBook.class.getCanonicalName()
+                + "{keptPersons=" + addressBook.getKeptPersonList() + "}";
         assertEquals(expected, addressBook.toString());
     }
 
@@ -134,7 +135,7 @@ public class AddressBookTest {
         }
 
         @Override
-        public ObservableList<Person> getPersonList() {
+        public ObservableList<Person> getKeptPersonList() {
             return persons;
         }
     }
