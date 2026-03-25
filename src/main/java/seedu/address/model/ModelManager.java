@@ -21,7 +21,10 @@ public class ModelManager implements Model {
 
     private final AddressBook addressBook;
     private final UserPrefs userPrefs;
-    private final FilteredList<Person> filteredPersons;
+    private final FilteredList<Person> filteredKeptPersons;
+    private final FilteredList<Person> filteredDeletedPersons;
+
+    private boolean isViewingDeletedPersons = false;
 
     /**
      * Initializes a ModelManager with the given addressBook and userPrefs.
@@ -33,7 +36,8 @@ public class ModelManager implements Model {
 
         this.addressBook = new AddressBook(addressBook);
         this.userPrefs = new UserPrefs(userPrefs);
-        filteredPersons = new FilteredList<>(this.addressBook.getKeptPersonList());
+        filteredKeptPersons = new FilteredList<>(this.addressBook.getKeptPersonList());
+        filteredDeletedPersons = new FilteredList<>(this.addressBook.getDeletedPersonList());
     }
 
     public ModelManager() {
@@ -101,6 +105,7 @@ public class ModelManager implements Model {
     @Override
     public void addPerson(Person person) {
         addressBook.addKeptPerson(person);
+        setToViewKeptPersons();
         updateFilteredPersonList(PREDICATE_SHOW_ALL_PERSONS);
     }
 
@@ -113,19 +118,28 @@ public class ModelManager implements Model {
 
     //=========== Filtered Person List Accessors =============================================================
 
+    public void setToViewDeletedPersons() {
+        isViewingDeletedPersons = true;
+    }
+
+    public void setToViewKeptPersons() {
+        isViewingDeletedPersons = false;
+    }
+
     /**
      * Returns an unmodifiable view of the list of {@code Person} backed by the internal list of
      * {@code versionedAddressBook}
      */
     @Override
     public ObservableList<Person> getFilteredPersonList() {
-        return filteredPersons;
+        return isViewingDeletedPersons ? filteredDeletedPersons : filteredKeptPersons;
     }
 
     @Override
     public void updateFilteredPersonList(Predicate<Person> predicate) {
         requireNonNull(predicate);
-        filteredPersons.setPredicate(predicate);
+        filteredKeptPersons.setPredicate(predicate);
+        filteredDeletedPersons.setPredicate(predicate);
     }
 
     @Override
@@ -142,7 +156,9 @@ public class ModelManager implements Model {
         ModelManager otherModelManager = (ModelManager) other;
         return addressBook.equals(otherModelManager.addressBook)
                 && userPrefs.equals(otherModelManager.userPrefs)
-                && filteredPersons.equals(otherModelManager.filteredPersons);
+                && filteredKeptPersons.equals(otherModelManager.filteredKeptPersons)
+                && filteredDeletedPersons.equals(otherModelManager.filteredDeletedPersons)
+                && isViewingDeletedPersons == otherModelManager.isViewingDeletedPersons;
     }
 
 }
