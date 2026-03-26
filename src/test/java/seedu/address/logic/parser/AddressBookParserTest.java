@@ -9,6 +9,7 @@ import static seedu.address.testutil.TypicalIndexes.INDEX_FIRST_PERSON;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.Test;
@@ -17,6 +18,7 @@ import seedu.address.logic.commands.AddCommand;
 import seedu.address.logic.commands.AliasCommand;
 import seedu.address.logic.commands.AliasesCommand;
 import seedu.address.logic.commands.ClearCommand;
+import seedu.address.logic.commands.CommandWords;
 import seedu.address.logic.commands.DeleteCommand;
 import seedu.address.logic.commands.EditCommand;
 import seedu.address.logic.commands.EditCommand.EditPersonDescriptor;
@@ -111,6 +113,27 @@ public class AddressBookParserTest {
     public void parseCommand_unalias() throws Exception {
         UnaliasCommand command = (UnaliasCommand) parser.parseCommand(UnaliasCommand.COMMAND_WORD + " ls");
         assertEquals(new UnaliasCommand("ls"), command);
+    }
+
+    @Test
+    public void parseCommand_allBuiltInCommandWordsHaveWorkingExamples_success() throws Exception {
+        Map<String, String> commandExamples = Map.ofEntries(
+                Map.entry(AddCommand.COMMAND_WORD, "add n/Amy p/91234567 e/amy@example.com a/123, Clementi Rd"),
+                Map.entry(AliasCommand.COMMAND_WORD, "alias ls list"),
+                Map.entry(AliasesCommand.COMMAND_WORD, "aliases"),
+                Map.entry(ClearCommand.COMMAND_WORD, "clear"),
+                Map.entry(DeleteCommand.COMMAND_WORD, "delete 1"),
+                Map.entry(EditCommand.COMMAND_WORD, "edit 1 n/Amy"),
+                Map.entry(ExitCommand.COMMAND_WORD, "exit"),
+                Map.entry(FindCommand.COMMAND_WORD, "find Amy"),
+                Map.entry(HelpCommand.COMMAND_WORD, "help"),
+                Map.entry(ListCommand.COMMAND_WORD, "list"),
+                Map.entry(UnaliasCommand.COMMAND_WORD, "unalias ls"));
+
+        assertEquals(CommandWords.BUILT_IN_COMMAND_WORDS, commandExamples.keySet());
+        for (String commandExample : commandExamples.values()) {
+            parser.parseCommand(commandExample);
+        }
     }
 
     @Test

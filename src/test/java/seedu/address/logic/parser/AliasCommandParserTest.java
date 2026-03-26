@@ -25,6 +25,11 @@ public class AliasCommandParserTest {
     }
 
     @Test
+    public void parse_templateWithDefaultArguments_success() {
+        assertParseSuccess(parser, "ss find m/ss meie", new AliasCommand("ss", "find m/ss meie"));
+    }
+
+    @Test
     public void parse_missingParts_failure() {
         assertParseFailure(parser, "", MESSAGE_INVALID_FORMAT);
         assertParseFailure(parser, "ls", MESSAGE_INVALID_FORMAT);

@@ -1,6 +1,7 @@
 package seedu.address.model;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static seedu.address.testutil.Assert.assertThrows;
 
 import java.util.Map;
@@ -39,6 +40,26 @@ public class UserPrefsTest {
 
         userPrefs.removeCommandAlias("ls");
         assertEquals(Map.of(), userPrefs.getCommandAliases());
+    }
+
+    @Test
+    public void resetData_copiesCommandAliases_success() {
+        UserPrefs source = new UserPrefs();
+        source.setCommandAlias("ls", "list");
+
+        UserPrefs target = new UserPrefs();
+        target.resetData(source);
+        source.setCommandAlias("rm", "delete");
+
+        assertEquals(Map.of("ls", "list"), target.getCommandAliases());
+    }
+
+    @Test
+    public void toString_containsCommandAliases() {
+        UserPrefs userPrefs = new UserPrefs();
+        userPrefs.setCommandAlias("ls", "list");
+
+        assertTrue(userPrefs.toString().contains("ls=list"));
     }
 
 }
