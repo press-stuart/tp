@@ -120,7 +120,7 @@ public class FindCommandTest {
         FindCommand command = new FindCommand(predicate);
         expectedModel.updateFilteredPersonList(predicate);
         assertCommandSuccess(command, model, expectedMessage, expectedModel);
-        assertEquals(Collections.singletonList(ELLE), model.getFilteredPersonList());
+        assertEquals(Collections.singletonList(ELLE), model.getFilteredKeptPersonList());
     }
 
     @Test
@@ -131,7 +131,7 @@ public class FindCommandTest {
         FindCommand command = new FindCommand(predicate);
         expectedModel.updateFilteredPersonList(predicate);
         assertCommandSuccess(command, model, expectedMessage, expectedModel);
-        assertEquals(Arrays.asList(CARL, DANIEL, GEORGE), model.getFilteredPersonList());
+        assertEquals(Arrays.asList(CARL, DANIEL, GEORGE), model.getFilteredKeptPersonList());
     }
 
     @Test
