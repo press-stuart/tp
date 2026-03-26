@@ -113,6 +113,7 @@ Here are the other classes in `Logic` (omitted from the class diagram above) tha
 How the parsing works:
 * When called upon to parse a user command, the `AddressBookParser` class creates an `XYZCommandParser` (`XYZ` is a placeholder for the specific command name e.g., `AddCommandParser`) which uses the other classes shown above to parse the user command and create a `XYZCommand` object (e.g., `AddCommand`) which the `AddressBookParser` returns back as a `Command` object.
 * All `XYZCommandParser` classes (e.g., `AddCommandParser`, `DeleteCommandParser`, ...) inherit from the `Parser` interface so that they can be treated similarly where possible e.g, during testing.
+* Alias validation uses `CommandWords` as the canonical list of built-in command words. When adding a new top-level command, update both `AddressBookParser` and `CommandWords` so the new command remains aliasable.
 
 ### Model component
 **API** : [`Model.java`](https://github.com/AY2526S2-CS2103T-T12-1/tp/tree/master/src/main/java/seedu/address/model/Model.java)
@@ -154,6 +155,42 @@ Classes used by multiple components are in the `seedu.address.commons` package.
 ## **Implementation**
 
 This section describes some noteworthy details on how certain features are implemented.
+
+### Find command
+
+The `find` command is implemented as a small "pipeline" that converts user input into a `PersonPredicate`, and then updates the model's filtered person list by applying that predicate to the active person list. The diagram below summarizes the key classes and their relationships.
+
+![Find Command Class Diagram](images/FindCommandClassDiagram.png)
+
+#### Parsing flow
+
+The sequence diagram below shows how the `find` command arguments are transformed into a `FindCommand` with the appropriate predicate.
+
+![Find Command Parsing Sequence Diagram](images/FindCommandParsingSequenceDiagram.png)
+
+The parsing flow is as follows:
+* `LogicManager` calls `AddressBookParser#parseCommand()`, which instantiates a `FindCommandParser` for the `find` command.
+* If the user provides an `m/` prefix, `FindMatchType.fromToken()` is used to determine the match type before `ParsedFindArgs` is created; otherwise the default match type (i.e. keyword match type) is assumed when building `ParsedFindArgs`.
+* `FindMatchType.createPredicate(...)` creates a concrete, match-type-specific `PersonPredicate`.
+* `FindCommandParser` constructs the `FindCommand` with the predicate and returns it to `AddressBookParser`, which returns it to `LogicManager`.
+
+#### Predicate structure
+
+All find predicates implement `PersonPredicate`, which is a `Predicate<Person>`. The current implementation provides a shared abstract base class (`PersonContainsFieldsPredicate`) that:
+
+* iterates through each keyword
+* checks the keyword against most `Person` fields (e.g. name, phone, email, address, role, notes, tags)
+* delegates the actual field-matching logic to `matchesField(...)`
+
+Concrete predicate classes will implement the `matchesField(...)` method, keeping the overall matching logic consistent and easy to extend.
+
+#### Extending find
+
+To add a new match type or predicate in the future:
+
+* implement a new `PersonPredicate` (or extend `PersonContainsFieldsPredicate` if it fits the same "match across most fields" pattern)
+* add a new enum value and token in `FindMatchType` that returns the new predicate from `createPredicate(...)`
+* update any docs that mention match types (the parser logic does not need to change if the match type continues to be provided via `m/`)
 
 ### \[Proposed\] Undo/redo feature
 

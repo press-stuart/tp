@@ -3,6 +3,7 @@ package seedu.address.logic.commands;
 import static java.util.Objects.requireNonNull;
 
 import java.util.Objects;
+import java.util.Optional;
 
 import seedu.address.commons.util.ToStringBuilder;
 
@@ -22,14 +23,26 @@ public class CommandResult {
     /** The application should exit. */
     private final boolean isExit;
 
+    /** The command box should be populated with this text. */
+    private final String commandTextToPopulate;
+
     /**
      * Constructs a {@code CommandResult} with the specified fields.
      */
     public CommandResult(String feedbackToUser, boolean isShowBin, boolean isShowHelp, boolean isExit) {
+        this(feedbackToUser, isShowBin, isShowHelp, isExit, null);
+    }
+
+    /**
+     * Constructs a {@code CommandResult} with the specified fields.
+     */
+    public CommandResult(String feedbackToUser, boolean isShowBin, boolean isShowHelp, boolean isExit,
+            String commandTextToPopulate) {
         this.feedbackToUser = requireNonNull(feedbackToUser);
         this.isShowBin = isShowBin;
         this.isShowHelp = isShowHelp;
         this.isExit = isExit;
+        this.commandTextToPopulate = commandTextToPopulate;
     }
 
     /**
@@ -56,6 +69,10 @@ public class CommandResult {
         return isExit;
     }
 
+    public Optional<String> getCommandTextToPopulate() {
+        return Optional.ofNullable(commandTextToPopulate);
+    }
+
     @Override
     public boolean equals(Object other) {
         if (other == this) {
@@ -71,12 +88,13 @@ public class CommandResult {
         return feedbackToUser.equals(otherCommandResult.feedbackToUser)
                 && isShowBin == otherCommandResult.isShowBin
                 && isShowHelp == otherCommandResult.isShowHelp
-                && isExit == otherCommandResult.isExit;
+                && isExit == otherCommandResult.isExit
+                && Objects.equals(commandTextToPopulate, otherCommandResult.commandTextToPopulate);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(feedbackToUser, isShowBin, isShowHelp, isExit);
+        return Objects.hash(feedbackToUser, isShowBin, isShowHelp, isExit, commandTextToPopulate);
     }
 
     @Override
@@ -86,6 +104,7 @@ public class CommandResult {
                 .add("isShowBin", isShowBin)
                 .add("isShowHelp", isShowHelp)
                 .add("isExit", isExit)
+                .add("commandTextToPopulate", commandTextToPopulate)
                 .toString();
     }
 

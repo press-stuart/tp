@@ -36,6 +36,9 @@ public class CommandResultTest {
 
         // different exit value -> returns false
         assertFalse(commandResult.equals(new CommandResult("feedback", false, false, true)));
+
+        // different commandTextToPopulate value -> returns false
+        assertFalse(commandResult.equals(new CommandResult("feedback", false, false, false, "list")));
     }
 
     @Test
@@ -56,6 +59,10 @@ public class CommandResultTest {
 
         // different exit value -> returns different hashcode
         assertNotEquals(commandResult.hashCode(), new CommandResult("feedback", false, false, true).hashCode());
+
+        // different commandTextToPopulate value -> returns different hashcode
+        assertNotEquals(commandResult.hashCode(),
+                new CommandResult("feedback", false, false, false, "list").hashCode());
     }
 
     @Test
@@ -65,7 +72,8 @@ public class CommandResultTest {
                 + "{feedbackToUser=" + commandResult.getFeedbackToUser()
                 + ", isShowBin=" + commandResult.isShowBin()
                 + ", isShowHelp=" + commandResult.isShowHelp()
-                + ", isExit=" + commandResult.isExit() + "}";
+                + ", isExit=" + commandResult.isExit()
+                + ", commandTextToPopulate=" + commandResult.getCommandTextToPopulate().orElse(null) + "}";
         assertEquals(expected, commandResult.toString());
     }
 }
