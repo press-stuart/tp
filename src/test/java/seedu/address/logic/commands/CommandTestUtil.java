@@ -27,6 +27,7 @@ import seedu.address.testutil.EditPersonDescriptorBuilder;
 
 /**
  * Contains helper methods for testing commands.
+ * Some test cases in this class were adapted from Codex-generated test specifications.
  */
 public class CommandTestUtil {
 
