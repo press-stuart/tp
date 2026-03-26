@@ -88,7 +88,8 @@ public class LogicManager implements Logic {
     }
 
     private CommandResult executeNormalCommand(String commandText) throws CommandException, ParseException {
-        Command command = addressBookParser.parseCommand(commandText);
+        String expandedCommandText = expandAlias(commandText);
+        Command command = addressBookParser.parseCommand(expandedCommandText);
         CommandResult commandResult = command.execute(model);
 
         try {

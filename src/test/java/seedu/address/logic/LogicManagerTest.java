@@ -209,6 +209,9 @@ public class LogicManagerTest {
     @Test
     public void execute_invalidAliasTemplate_throwsParseException() {
         assertParseException("alias l ls", AliasCommand.MESSAGE_INVALID_ALIAS_TEMPLATE);
+    }
+
+    @Test
     public void execute_editPreviousWithoutPreviousCommand_throwsCommandException() {
         assertCommandException(LogicManager.EDIT_PREVIOUS_COMMAND_WORD,
                 LogicManager.EDIT_PREVIOUS_MESSAGE_NO_PREVIOUS_COMMAND);
