@@ -11,6 +11,8 @@ import static seedu.address.testutil.TypicalPersons.ALICE;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
+import java.util.Map;
 import java.util.function.Predicate;
 
 import org.junit.jupiter.api.Test;
@@ -25,6 +27,10 @@ import seedu.address.model.ReadOnlyAddressBook;
 import seedu.address.model.ReadOnlyUserPrefs;
 import seedu.address.model.person.Person;
 import seedu.address.testutil.PersonBuilder;
+
+/**
+ * Reused from Codex suggestions upon providing specifications
+ */
 
 public class AddCommandTest {
 
@@ -180,6 +186,26 @@ public class AddCommandTest {
         }
 
         @Override
+        public Map<String, String> getCommandAliases() {
+            throw new AssertionError("This method should not be called.");
+        }
+
+        @Override
+        public boolean hasCommandAlias(String shortName) {
+            throw new AssertionError("This method should not be called.");
+        }
+
+        @Override
+        public void setCommandAlias(String shortName, String template) {
+            throw new AssertionError("This method should not be called.");
+        }
+
+        @Override
+        public void removeCommandAlias(String shortName) {
+            throw new AssertionError("This method should not be called.");
+        }
+
+        @Override
         public void addPerson(Person person) {
             throw new AssertionError("This method should not be called.");
         }
@@ -216,6 +242,11 @@ public class AddCommandTest {
 
         @Override
         public void updateFilteredPersonList(Predicate<Person> predicate) {
+            throw new AssertionError("This method should not be called.");
+        }
+
+        @Override
+        public void updateSortedPersonList(Comparator<Person> comparator) {
             throw new AssertionError("This method should not be called.");
         }
     }

@@ -1,6 +1,8 @@
 package seedu.address.model;
 
 import java.nio.file.Path;
+import java.util.Comparator;
+import java.util.Map;
 import java.util.function.Predicate;
 
 import javafx.collections.ObservableList;
@@ -45,6 +47,26 @@ public interface Model {
     void setAddressBookFilePath(Path addressBookFilePath);
 
     /**
+     * Returns the configured command aliases.
+     */
+    Map<String, String> getCommandAliases();
+
+    /**
+     * Returns true if the alias exists.
+     */
+    boolean hasCommandAlias(String shortName);
+
+    /**
+     * Creates or updates the alias mapping.
+     */
+    void setCommandAlias(String shortName, String template);
+
+    /**
+     * Removes the alias mapping.
+     */
+    void removeCommandAlias(String shortName);
+
+    /**
      * Replaces address book data with the data in {@code addressBook}.
      */
     void setAddressBook(ReadOnlyAddressBook addressBook);
@@ -84,4 +106,10 @@ public interface Model {
      * @throws NullPointerException if {@code predicate} is null.
      */
     void updateFilteredPersonList(Predicate<Person> predicate);
+
+    /**
+     * Updates the sorting of the filtered person list using the given {@code comparator}.
+     * A {@code null} comparator removes sorting and restores the original order.
+     */
+    void updateSortedPersonList(Comparator<Person> comparator);
 }

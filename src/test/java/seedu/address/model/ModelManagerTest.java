@@ -12,12 +12,20 @@ import static seedu.address.testutil.TypicalPersons.CARL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
+import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 
 import seedu.address.commons.core.GuiSettings;
 import seedu.address.model.person.predicates.PersonContainsKeywordsPredicate;
+import seedu.address.model.person.sort.PersonSortComparator;
+import seedu.address.model.person.sort.SortAttribute;
+import seedu.address.model.person.sort.SortOrder;
 import seedu.address.testutil.AddressBookBuilder;
+
+/**
+ * Reused from Codex suggestions upon providing specifications
+ */
 
 public class ModelManagerTest {
 
@@ -40,12 +48,14 @@ public class ModelManagerTest {
         UserPrefs userPrefs = new UserPrefs();
         userPrefs.setAddressBookFilePath(Paths.get("address/book/file/path"));
         userPrefs.setGuiSettings(new GuiSettings(1, 2, 3, 4));
+        userPrefs.setCommandAlias("ls", "list");
         modelManager.setUserPrefs(userPrefs);
         assertEquals(userPrefs, modelManager.getUserPrefs());
 
         // Modifying userPrefs should not modify modelManager's userPrefs
         UserPrefs oldUserPrefs = new UserPrefs(userPrefs);
         userPrefs.setAddressBookFilePath(Paths.get("new/address/book/file/path"));
+        userPrefs.setCommandAlias("rm", "delete");
         assertEquals(oldUserPrefs, modelManager.getUserPrefs());
     }
 
@@ -74,6 +84,17 @@ public class ModelManagerTest {
     }
 
     @Test
+    public void commandAliases_modifyAliasRegistry_success() {
+        modelManager.setCommandAlias("ls", "list");
+        assertTrue(modelManager.hasCommandAlias("ls"));
+        assertEquals(Map.of("ls", "list"), modelManager.getCommandAliases());
+
+        modelManager.removeCommandAlias("ls");
+        assertFalse(modelManager.hasCommandAlias("ls"));
+        assertEquals(Map.of(), modelManager.getCommandAliases());
+    }
+
+    @Test
     public void hasPerson_nullPerson_throwsNullPointerException() {
         assertThrows(NullPointerException.class, () -> modelManager.hasPerson(null));
     }
@@ -97,6 +118,17 @@ public class ModelManagerTest {
     @Test
     public void updateFilteredPersonList_nullPredicate_throwsNullPointerException() {
         assertThrows(NullPointerException.class, () -> modelManager.updateFilteredPersonList(null));
+    }
+
+    @Test
+    public void updateSortedPersonList_nullComparator_resetsSorting() {
+        modelManager.addPerson(ALICE);
+        modelManager.addPerson(BENSON);
+        modelManager.updateSortedPersonList(new PersonSortComparator(SortAttribute.NAME, SortOrder.DESC));
+        assertEquals(Arrays.asList(BENSON, ALICE), modelManager.getFilteredPersonList());
+
+        modelManager.updateSortedPersonList(null);
+        assertEquals(Arrays.asList(ALICE, BENSON), modelManager.getFilteredPersonList());
     }
 
     @Test
@@ -141,6 +173,13 @@ public class ModelManagerTest {
 
         // resets modelManager to initial state for upcoming tests
         modelManager.updateFilteredPersonList(PREDICATE_SHOW_ALL_PERSONS);
+
+        // different sortedList -> returns false
+        modelManager.updateSortedPersonList(new PersonSortComparator(SortAttribute.NAME, SortOrder.ASC));
+        assertFalse(modelManager.equals(new ModelManager(addressBook, userPrefs)));
+
+        // resets modelManager to initial state for upcoming tests
+        modelManager.updateSortedPersonList(null);
 
         // different userPrefs -> returns false
         UserPrefs differentUserPrefs = new UserPrefs();
