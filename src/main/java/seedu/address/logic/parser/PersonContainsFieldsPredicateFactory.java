@@ -10,10 +10,10 @@ import seedu.address.model.person.predicates.PersonContainsSubstringsPredicate;
 /**
  * Creates {@code PersonContainsFieldsPredicate} instances for supported find match types.
  */
-public final class FindMatchTypeFactory {
+public final class PersonContainsFieldsPredicateFactory {
 
-    private FindMatchTypeFactory() {
-        throw new UnsupportedOperationException("This is a utility class and cannot be instantiated");
+    private PersonContainsFieldsPredicateFactory() {
+        throw new UnsupportedOperationException("This is a factory class and cannot be instantiated");
     }
 
     /**
