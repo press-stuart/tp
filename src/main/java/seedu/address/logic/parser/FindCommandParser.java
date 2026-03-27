@@ -30,7 +30,8 @@ public class FindCommandParser implements Parser<FindCommand> {
         }
 
         PersonContainsFieldsPredicate predicate =
-                FindMatchTypeFactory.createPredicate(parsedFindArgs.matchType(), parsedFindArgs.keywords());
+                PersonContainsFieldsPredicateFactory.createPredicate(parsedFindArgs.matchType(),
+                        parsedFindArgs.keywords());
         return new FindCommand(predicate);
     }
 
