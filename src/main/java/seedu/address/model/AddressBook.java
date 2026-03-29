@@ -1,6 +1,7 @@
 package seedu.address.model;
 
 import static java.util.Objects.requireNonNull;
+import static seedu.address.commons.util.CollectionUtil.requireAllNonNull;
 
 import java.util.List;
 import java.util.Objects;
@@ -48,6 +49,7 @@ public class AddressBook implements ReadOnlyAddressBook {
      * {@code keptPersons} must not contain duplicate persons with respect to identity fields.
      */
     public void setKeptPersons(List<Person> keptPersons) {
+        requireAllNonNull(keptPersons);
         this.keptPersons.setPersons(keptPersons);
     }
 
@@ -56,6 +58,7 @@ public class AddressBook implements ReadOnlyAddressBook {
      * {@code deletedPersons} must not contain duplicate persons with all fields equal.
      */
     public void setDeletedPersons(List<Person> deletedPersons) {
+        requireAllNonNull(deletedPersons);
         this.deletedPersons.setPersons(deletedPersons);
     }
 
@@ -92,6 +95,7 @@ public class AddressBook implements ReadOnlyAddressBook {
      * The person must not already exist in the list of kept persons.
      */
     public void addPerson(Person p) {
+        requireNonNull(p);
         assert !hasKeptPerson(p) : "Person is already in the list of kept persons";
         keptPersons.add(p);
     }
@@ -102,7 +106,7 @@ public class AddressBook implements ReadOnlyAddressBook {
      * The person identity of {@code editedPerson} must not be the same as another existing person in the list.
      */
     public void setKeptPerson(Person target, Person editedPerson) {
-        requireNonNull(editedPerson);
+        requireAllNonNull(target, editedPerson);
         assert hasKeptPerson(target) : "Target person is not in the list of kept persons";
         keptPersons.setPerson(target, editedPerson);
     }
@@ -113,6 +117,7 @@ public class AddressBook implements ReadOnlyAddressBook {
      * If {@code key} already exists in the list of deleted persons, it will not be added again.
      */
     public void deletePerson(Person key) {
+        requireNonNull(key);
         assert hasKeptPerson(key) : "Person to delete is not in the list of kept persons";
         keptPersons.remove(key);
         deletedPersons.add(key);
@@ -123,6 +128,7 @@ public class AddressBook implements ReadOnlyAddressBook {
      * If the person already exists in the list of deleted persons, it will not be added again.
      */
     public void addDeletedPerson(Person p) {
+        requireNonNull(p);
         deletedPersons.add(p);
     }
 
