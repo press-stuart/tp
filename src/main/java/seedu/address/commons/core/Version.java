@@ -112,10 +112,11 @@ public class Version implements Comparable<Version> {
 
     @Override
     public int hashCode() {
-        String hash = String.format("%03d%03d%03d", major, minor, patch);
-        if (!isEarlyAccess) {
-            hash = "1" + hash;
-        }
-        return Integer.parseInt(hash);
+        int hash = 17;
+        hash = 31 * hash + major;
+        hash = 31 * hash + minor;
+        hash = 31 * hash + patch;
+        hash = 31 * hash + Boolean.hashCode(isEarlyAccess);
+        return hash;
     }
 }
