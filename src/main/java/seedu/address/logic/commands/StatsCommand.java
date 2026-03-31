@@ -51,7 +51,7 @@ public class StatsCommand extends Command {
     public CommandResult execute(Model model) throws CommandException {
         requireNonNull(model);
         StatisticsGenerator generator = generatorFactory.create(category);
-        StatisticsReport report = generator.generate(model.getAddressBook().getPersonList());
+        StatisticsReport report = generator.generate(model.getAddressBook().getKeptPersonList());
         return new CommandResult(report.render());
     }
 
