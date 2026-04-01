@@ -45,7 +45,7 @@ public class LogicManager implements Logic {
     private final Model model;
     private final Storage storage;
     private final AddressBookParser addressBookParser;
-    private PersonListView personListView;
+
     private String lastExecutedCommandText;
 
     /**
@@ -55,12 +55,12 @@ public class LogicManager implements Logic {
         this.model = model;
         this.storage = storage;
         addressBookParser = new AddressBookParser();
-        personListView = PersonListView.KEPT_PERSONS;
     }
 
     // Reused refactor suggestion from Codex to reduce indentation level and improve readability
     @Override
-    public CommandResult execute(String commandText) throws CommandException, ParseException {
+    public CommandResult execute(String commandText, PersonListView personListView)
+            throws CommandException, ParseException {
         logger.info("----------------[USER COMMAND][" + commandText + "]");
 
         String trimmedCommandText = commandText.trim();
@@ -84,7 +84,7 @@ public class LogicManager implements Logic {
         }
         return new CommandResult(
                 String.format(EDIT_PREVIOUS_MESSAGE_SUCCESS, lastExecutedCommandText),
-                PersonListView.SAME_AS_PREVIOUS,
+                personListView,
                 false,
                 false,
                 lastExecutedCommandText);
@@ -94,7 +94,6 @@ public class LogicManager implements Logic {
         String expandedCommandText = expandAlias(commandText);
         Command command = addressBookParser.parseCommand(expandedCommandText);
         CommandResult commandResult = command.execute(model);
-        personListView = PersonListView.updatePersonListView(personListView, commandResult.getListToShow());
 
         try {
             storage.saveAddressBook(model.getAddressBook());
@@ -115,15 +114,13 @@ public class LogicManager implements Logic {
     }
 
     @Override
-    public ObservableList<Person> getFilteredPersonList() {
-        switch (personListView) {
-        case KEPT_PERSONS:
-            return model.getFilteredKeptPersonList();
-        case DELETED_PERSONS:
-            return model.getFilteredDeletedPersonList();
-        default:
-            throw new IllegalStateException("Invalid personListView: " + personListView);
-        }
+    public ObservableList<Person> getFilteredKeptPersonList() {
+        return model.getFilteredKeptPersonList();
+    }
+
+    @Override
+    public ObservableList<Person> getFilteredDeletedPersonList() {
+        return model.getFilteredDeletedPersonList();
     }
 
     @Override
