@@ -15,7 +15,7 @@ Class "{abstract}\nCommand" as Command
 
 Class "<<interface>>\nLogic" as Logic
 Class LogicManager
-Class "<<enumeration>>\nListToShow" as ListToShow
+Class "<<enumeration>>\nPersonListView" as PersonListView
 }
 
 package Model {
@@ -46,7 +46,7 @@ Logic ..> CommandResult
 LogicManager .down.> CommandResult
 Command .up.> CommandResult : <<create>>
 
-CommandResult --> "1" ListToShow
-LogicManager --> "1  " ListToShow
-XYZCommand .> ListToShow
+CommandResult --> "1" PersonListView
+LogicManager ..> PersonListView
+XYZCommand .> PersonListView
 @enduml
