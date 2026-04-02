@@ -67,7 +67,7 @@ public class ImportCommandTest {
         assertEquals(String.join(System.lineSeparator(),
                 "Imported 1 volunteers from " + inputFile + ".",
                 "Duplicate rows: 1, Invalid rows: 1",
-                "Duplicate row details: 3 (same phone and email)",
+                "Duplicate row details: 3 (duplicate)",
                 "Invalid row details: 4 (missing phone)"), result.getFeedbackToUser());
 
         assertEquals(1, model.personsAdded.size());

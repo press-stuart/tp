@@ -64,11 +64,10 @@ public class ImportCommand extends Command {
         for (CsvImportRowSuccess successRow : result.getValidRows()) {
             Person person = successRow.getPerson();
 
-            Person duplicatePerson = findDuplicatePerson(model, personsImportedThisRun, person);
-            if (duplicatePerson != null) {
+            if (findDuplicatePerson(model, personsImportedThisRun, person) != null) {
                 duplicateRows.add(new CsvImportRowError(
                         successRow.getRowNumber(),
-                        getDuplicateReason(person, duplicatePerson)));
+                        "duplicate"));
             } else {
                 model.addPerson(person);
                 personsImportedThisRun.add(person);
@@ -94,22 +93,6 @@ public class ImportCommand extends Command {
 
         return null;
     }
-
-    private String getDuplicateReason(Person importedPerson, Person existingPerson) {
-        boolean samePhone = existingPerson.getPhone().equals(importedPerson.getPhone());
-        boolean sameEmail = existingPerson.getEmail().equals(importedPerson.getEmail());
-
-        if (samePhone && sameEmail) {
-            return "same phone and email";
-        } else if (samePhone) {
-            return "same phone";
-        } else if (sameEmail) {
-            return "same email";
-        } else {
-            return "duplicate";
-        }
-    }
-
     private String buildSummaryMessage(int importedCount,
                                        List<CsvImportRowError> duplicateRows,
                                        List<CsvImportRowError> invalidRows) {
