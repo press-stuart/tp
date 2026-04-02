@@ -7,9 +7,9 @@ participant ":LogicManager" as LogicManager LOGIC_COLOR
 participant ":AddressBookParser" as AddressBookParser LOGIC_COLOR
 participant ":FindCommandParser" as FindCommandParser LOGIC_COLOR
 participant "<<class>>\nFindMatchType" as FindMatchTypeClass LOGIC_COLOR
+participant "<<class>>\nVolunteerAvailability" as VolunteerAvailability MODEL_COLOR
 participant "<<class>>\nPersonContainsFieldsPredicateFactory" as PersonContainsFieldsPredicateFactory LOGIC_COLOR
 participant ":ParsedFindArgs" as ParsedFindArgs LOGIC_COLOR
-participant ":PersonContainsFieldsPredicate" as PersonContainsFieldsPredicate LOGIC_COLOR
 participant "f:FindCommand" as FindCommand LOGIC_COLOR
 end box
 
@@ -30,29 +30,28 @@ alt m/ prefix provided
     activate FindMatchTypeClass
     FindMatchTypeClass --> FindCommandParser : matchType
     deactivate FindMatchTypeClass
-    create ParsedFindArgs
-    FindCommandParser -> ParsedFindArgs : ParsedFindArgs(...)
-    activate ParsedFindArgs
-    ParsedFindArgs --> FindCommandParser :
-    deactivate ParsedFindArgs
-else m/ prefix not provided
-    create ParsedFindArgs
-    FindCommandParser -> ParsedFindArgs : ParsedFindArgs(...)
-    activate ParsedFindArgs
-    ParsedFindArgs --> FindCommandParser :
-    deactivate ParsedFindArgs
 end
+alt va/ prefix provided
+    FindCommandParser -> VolunteerAvailability : fromString()
+    activate VolunteerAvailability
+    VolunteerAvailability --> FindCommandParser : availability
+    deactivate VolunteerAvailability
+end
+create ParsedFindArgs
+FindCommandParser -> ParsedFindArgs : ParsedFindArgs(matchType, availability, keywords)
+activate ParsedFindArgs
+ParsedFindArgs --> FindCommandParser :
+deactivate ParsedFindArgs
 deactivate FindCommandParser
 
-FindCommandParser -> PersonContainsFieldsPredicateFactory : createPredicate(...)
-activate PersonContainsFieldsPredicateFactory
-create PersonContainsFieldsPredicate
-PersonContainsFieldsPredicateFactory -> PersonContainsFieldsPredicate : create concrete subclass
-activate PersonContainsFieldsPredicate
-PersonContainsFieldsPredicate --> PersonContainsFieldsPredicateFactory : predicate
-deactivate PersonContainsFieldsPredicate
-PersonContainsFieldsPredicateFactory --> FindCommandParser : predicate
-deactivate PersonContainsFieldsPredicateFactory
+FindCommandParser -> FindCommandParser : buildPredicate(parsed)
+activate FindCommandParser
+note right
+  keywords only → text predicate via factory
+  va/ only → PersonAvailableDuringPredicate
+  both → CombinedAndPersonPredicate
+end note
+deactivate FindCommandParser
 
 create FindCommand
 FindCommandParser -> FindCommand : FindCommand(predicate)

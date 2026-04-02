@@ -17,10 +17,15 @@ Class "{abstract}\nPersonContainsFieldsPredicate" as PersonContainsFieldsPredica
 Class PersonContainsKeywordsPredicate #MODEL_COLOR
 Class PersonContainsSubstringsPredicate #MODEL_COLOR
 Class PersonContainsFuzzyKeywordsPredicate #MODEL_COLOR
+Class CombinedAndPersonPredicate #MODEL_COLOR
+Class PersonAvailableDuringPredicate #MODEL_COLOR
+Class VolunteerAvailability #MODEL_COLOR
 }
 
 FindCommandParser ..> FindMatchType
 FindCommandParser ..> PersonContainsFieldsPredicateFactory
+FindCommandParser ..> CombinedAndPersonPredicate
+FindCommandParser ..> PersonAvailableDuringPredicate
 PersonContainsFieldsPredicateFactory ..> FindMatchType
 PersonContainsFieldsPredicateFactory ..> PersonContainsFieldsPredicate
 FindCommandParser ..> FindCommand
@@ -30,4 +35,7 @@ PersonContainsFieldsPredicate ..|> PersonPredicate
 PersonContainsKeywordsPredicate --|> PersonContainsFieldsPredicate
 PersonContainsSubstringsPredicate --|> PersonContainsFieldsPredicate
 PersonContainsFuzzyKeywordsPredicate --|> PersonContainsFieldsPredicate
+CombinedAndPersonPredicate ..|> PersonPredicate
+PersonAvailableDuringPredicate ..|> PersonPredicate
+PersonAvailableDuringPredicate --> VolunteerAvailability
 @enduml
