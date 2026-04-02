@@ -6,12 +6,12 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 import seedu.address.commons.util.CsvImportFileResult;
 import seedu.address.commons.util.CsvImportRowError;
 import seedu.address.commons.util.CsvImportRowSuccess;
 import seedu.address.commons.util.CsvReaderUtil;
+import seedu.address.commons.util.ToStringBuilder;
 import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.model.Model;
 import seedu.address.model.person.Person;
@@ -154,7 +154,9 @@ public class ImportCommand extends Command {
     }
 
     @Override
-    public int hashCode() {
-        return Objects.hash(filePath);
+    public String toString() {
+        return new ToStringBuilder(this)
+                .add("filePath", filePath)
+                .toString();
     }
 }

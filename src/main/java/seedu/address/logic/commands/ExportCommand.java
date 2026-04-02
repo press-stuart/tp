@@ -5,9 +5,9 @@ import static java.util.Objects.requireNonNull;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
-import java.util.Objects;
 
 import seedu.address.commons.util.CsvWriterUtil;
+import seedu.address.commons.util.ToStringBuilder;
 import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.model.Model;
 import seedu.address.model.person.Person;
@@ -62,7 +62,9 @@ public class ExportCommand extends Command {
     }
 
     @Override
-    public int hashCode() {
-        return Objects.hash(filePath);
+    public String toString() {
+        return new ToStringBuilder(this)
+                .add("filePath", filePath)
+                .toString();
     }
 }
