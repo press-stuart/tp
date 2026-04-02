@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
 
+import seedu.address.commons.util.ToStringBuilder;
 import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.logic.csv.CsvWriterUtil;
 import seedu.address.model.Model;
@@ -58,5 +59,12 @@ public class ExportCommand extends Command {
         return other == this
                 || (other instanceof ExportCommand
                 && filePath.equals(((ExportCommand) other).filePath));
+    }
+
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this)
+                .add("filePath", filePath)
+                .toString();
     }
 }

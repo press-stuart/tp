@@ -7,6 +7,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
+import seedu.address.commons.util.ToStringBuilder;
 import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.logic.csv.CsvImportFileResult;
 import seedu.address.logic.csv.CsvImportRowError;
@@ -150,5 +151,12 @@ public class ImportCommand extends Command {
         return other == this
                 || (other instanceof ImportCommand
                 && filePath.equals(((ImportCommand) other).filePath));
+    }
+
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this)
+                .add("filePath", filePath)
+                .toString();
     }
 }
