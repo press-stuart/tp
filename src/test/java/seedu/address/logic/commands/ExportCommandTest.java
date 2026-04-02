@@ -122,6 +122,14 @@ public class ExportCommandTest {
         assertTrue(!content.contains("old content"));
     }
 
+    @Test
+    public void toStringMethod() {
+        Path filePath = Path.of("data/volunteers.csv");
+        ExportCommand exportCommand = new ExportCommand(filePath);
+        String expected = ExportCommand.class.getCanonicalName() + "{filePath=" + filePath + "}";
+        assertEquals(expected, exportCommand.toString());
+    }
+
     /**
      * A default model stub that fails on all methods.
      */

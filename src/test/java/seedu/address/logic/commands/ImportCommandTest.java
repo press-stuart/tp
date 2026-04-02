@@ -92,6 +92,14 @@ public class ImportCommandTest {
         }
     }
 
+    @Test
+    public void toStringMethod() {
+        Path filePath = Path.of("data/volunteers.csv");
+        ImportCommand importCommand = new ImportCommand(filePath);
+        String expected = ImportCommand.class.getCanonicalName() + "{filePath=" + filePath + "}";
+        assertEquals(expected, importCommand.toString());
+    }
+
     private abstract static class ModelStub implements Model {
 
         @Override
