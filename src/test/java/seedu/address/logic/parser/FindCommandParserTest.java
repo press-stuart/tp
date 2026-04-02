@@ -136,13 +136,11 @@ public class FindCommandParserTest {
     }
 
     @Test
-    public void parse_matchTypeOnlyWithAvailability_returnsFindCommand() {
-        // m/kw with no keywords but with availability should still succeed
-        VolunteerAvailability query = VolunteerAvailability.fromString("MONDAY,14:00,17:00");
-        PersonAvailableDuringPredicate predicate = new PersonAvailableDuringPredicate(query);
-        FindCommand expectedCommand = new FindCommand(predicate);
-        assertParseSuccess(parser, PREFIX_MATCH_TYPE + KEYWORD_TOKEN + " "
-                + PREFIX_AVAILABILITY + "MONDAY,14:00,17:00", expectedCommand);
+    public void parse_matchTypeWithAvailabilityButNoKeywords_throwsParseException() {
+        // m/kw with availability but no keywords should fail
+        assertParseFailure(parser, PREFIX_MATCH_TYPE + KEYWORD_TOKEN + " "
+                        + PREFIX_AVAILABILITY + "MONDAY,14:00,17:00",
+                String.format(MESSAGE_INVALID_COMMAND_FORMAT, FindCommand.MESSAGE_USAGE));
     }
 
     @Test

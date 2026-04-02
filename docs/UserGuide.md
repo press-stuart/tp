@@ -186,6 +186,7 @@ Format: `find [m/MATCH_TYPE] [va/DAY,HH:mm,HH:mm] [KEYWORD [MORE_KEYWORDS]]`
 * `va/DAY,HH:mm,HH:mm` filters for volunteers whose availability **fully covers** the specified time period. `DAY` is a full day name (e.g., `MONDAY`), and start time must be before end time.
 * When both keywords and `va/` are provided, only persons matching **both** the keyword search **and** the availability filter are returned.
 * At least one of keywords or `va/` must be provided.
+* If `m/MATCH_TYPE` is specified, at least one keyword must also be provided.
 
 Examples:
 * `find John` returns `john` and `John Doe`

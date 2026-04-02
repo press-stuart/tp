@@ -40,10 +40,16 @@ public class FindCommandParser implements Parser<FindCommand> {
 
         ParsedFindArgs parsed = parseFindArgs(argMultimap);
 
+        boolean hasMatchType = argMultimap.getValue(PREFIX_MATCH_TYPE).isPresent();
         boolean hasKeywords = !parsed.keywords().isEmpty();
         boolean hasAvailability = parsed.availability().isPresent();
 
         if (!hasKeywords && !hasAvailability) {
+            throw new ParseException(
+                    String.format(MESSAGE_INVALID_COMMAND_FORMAT, FindCommand.MESSAGE_USAGE));
+        }
+
+        if (hasMatchType && !hasKeywords) {
             throw new ParseException(
                     String.format(MESSAGE_INVALID_COMMAND_FORMAT, FindCommand.MESSAGE_USAGE));
         }

@@ -27,6 +27,7 @@ public class FindCommand extends Command {
             + "Parameters: [" + PREFIX_MATCH_TYPE + "MATCH_TYPE] "
             + "[" + PREFIX_AVAILABILITY + "DAY,HH:mm,HH:mm] [KEYWORD ...]\n"
             + "Currently supported MATCH_TYPE: " + KEYWORD_TOKEN + ", " + SUBSTRING_TOKEN + ", " + FUZZY_TOKEN + "\n"
+            + "If " + PREFIX_MATCH_TYPE + " is specified, at least one KEYWORD must also be provided.\n"
             + "Example: " + COMMAND_WORD + " " + PREFIX_MATCH_TYPE + KEYWORD_TOKEN + " alice bob charlie\n"
             + "Example: " + COMMAND_WORD + " " + PREFIX_MATCH_TYPE + SUBSTRING_TOKEN + " ali\n"
             + "Example: " + COMMAND_WORD + " " + PREFIX_MATCH_TYPE + FUZZY_TOKEN + " meyr\n"
