@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.nio.file.AccessDeniedException;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Optional;
 import java.util.logging.Logger;
 
 import javafx.collections.ObservableList;
@@ -12,7 +13,6 @@ import seedu.address.commons.core.LogsCenter;
 import seedu.address.logic.commands.AliasCommand;
 import seedu.address.logic.commands.Command;
 import seedu.address.logic.commands.CommandResult;
-import seedu.address.logic.commands.CommandWords;
 import seedu.address.logic.commands.EditPreviousCommand;
 import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.logic.parser.AddressBookParser;
@@ -31,19 +31,15 @@ public class LogicManager implements Logic {
 
     public static final String FILE_OPS_PERMISSION_ERROR_FORMAT =
             "Could not save data to file %s due to insufficient permissions to write to the file or the folder.";
-    public static final String EDIT_PREVIOUS_COMMAND_WORD = CommandWords.EDIT_PREVIOUS_COMMAND_WORD;
-    public static final String EDIT_PREVIOUS_MESSAGE_USAGE = EDIT_PREVIOUS_COMMAND_WORD
-            + ": Loads the last successfully executed command, excluding editprev, into the command box "
-            + "for editing.\n"
-            + "Example: " + EDIT_PREVIOUS_COMMAND_WORD;
-    public static final String EDIT_PREVIOUS_MESSAGE_NO_PREVIOUS_COMMAND = "There is no previous command to edit.";
-    public static final String EDIT_PREVIOUS_MESSAGE_SUCCESS = "Loaded previous command for editing: %1$s";
+    public static final String MESSAGE_INVALID_ALIASES_REMOVED_ON_STARTUP =
+            "Removed invalid aliases from preferences: %1$s";
 
     private final Logger logger = LogsCenter.getLogger(LogicManager.class);
 
     private final Model model;
     private final Storage storage;
     private final AddressBookParser addressBookParser;
+    private Optional<String> startupMessage = Optional.empty();
 
     /**
      * Constructs a {@code LogicManager} with the given {@code Model} and {@code Storage}.
@@ -115,6 +111,13 @@ public class LogicManager implements Logic {
         model.setGuiSettings(guiSettings);
     }
 
+    @Override
+    public Optional<String> consumeStartupMessage() {
+        Optional<String> message = startupMessage;
+        startupMessage = Optional.empty();
+        return message;
+    }
+
     private String expandAlias(String commandText) {
         return ParserUtil.parseCommandComponents(commandText)
                 .map(commandComponents -> expandAlias(commandText, commandComponents))
@@ -139,6 +142,10 @@ public class LogicManager implements Logic {
                 .toList();
 
         invalidAliases.forEach(model::removeCommandAlias);
+        if (!invalidAliases.isEmpty()) {
+            startupMessage = Optional.of(String.format(MESSAGE_INVALID_ALIASES_REMOVED_ON_STARTUP,
+                    String.join(", ", invalidAliases)));
+        }
     }
 
     /**

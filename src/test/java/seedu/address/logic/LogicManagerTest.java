@@ -1,6 +1,7 @@
 package seedu.address.logic;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static seedu.address.logic.Messages.MESSAGE_INVALID_PERSON_DISPLAYED_INDEX;
 import static seedu.address.logic.Messages.MESSAGE_PERSONS_LISTED_OVERVIEW;
 import static seedu.address.logic.Messages.MESSAGE_UNKNOWN_COMMAND;
@@ -17,6 +18,7 @@ import java.io.IOException;
 import java.nio.file.AccessDeniedException;
 import java.nio.file.Path;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -30,7 +32,6 @@ import seedu.address.logic.commands.AliasCommand;
 import seedu.address.logic.commands.AliasesCommand;
 import seedu.address.logic.commands.ClearCommand;
 import seedu.address.logic.commands.CommandResult;
-import seedu.address.logic.commands.CommandWords;
 import seedu.address.logic.commands.DeleteCommand;
 import seedu.address.logic.commands.EditPreviousCommand;
 import seedu.address.logic.commands.ListCommand;
@@ -254,11 +255,41 @@ public class LogicManagerTest {
                 "good", ListCommand.COMMAND_WORD,
                 "chain", "good",
                 "loop", "loop",
-                "aa", CommandWords.EDIT_PREVIOUS_COMMAND_WORD));
+                "aa", EditPreviousCommand.COMMAND_WORD));
         model = new ModelManager(getTypicalAddressBook(), userPrefs);
         resetLogic();
 
         assertEquals(Map.of("good", ListCommand.COMMAND_WORD), model.getCommandAliases());
+    }
+
+    @Test
+    public void consumeStartupMessage_afterSanitizingLoadedAliases_returnsOneTimeWarning() {
+        UserPrefs userPrefs = new UserPrefs();
+        Map<String, String> aliases = new LinkedHashMap<>();
+        aliases.put("good", ListCommand.COMMAND_WORD);
+        aliases.put("chain", "good");
+        aliases.put("loop", "loop");
+        aliases.put("aa", EditPreviousCommand.COMMAND_WORD);
+        userPrefs.setCommandAliases(aliases);
+        model = new ModelManager(getTypicalAddressBook(), userPrefs);
+        resetLogic();
+
+        String startupMessage = logic.consumeStartupMessage().orElseThrow();
+        assertTrue(startupMessage.startsWith("Removed invalid aliases from preferences: "));
+        assertTrue(startupMessage.contains("chain"));
+        assertTrue(startupMessage.contains("loop"));
+        assertTrue(startupMessage.contains("aa"));
+        assertEquals(Optional.empty(), logic.consumeStartupMessage());
+    }
+
+    @Test
+    public void consumeStartupMessage_withoutInvalidAliases_returnsEmpty() {
+        UserPrefs userPrefs = new UserPrefs();
+        userPrefs.setCommandAliases(Map.of("good", ListCommand.COMMAND_WORD));
+        model = new ModelManager(getTypicalAddressBook(), userPrefs);
+        resetLogic();
+
+        assertEquals(Optional.empty(), logic.consumeStartupMessage());
     }
 
     @Test
