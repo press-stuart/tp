@@ -205,4 +205,16 @@ public class FindCommandParserTest {
                 String.format(MESSAGE_INVALID_COMMAND_FORMAT, FindCommand.MESSAGE_USAGE));
     }
 
+    @Test
+    public void parse_emptyMatchType_throwsParseException() {
+        // m/ present but no match type token
+        assertParseFailure(parser, " " + PREFIX_MATCH_TYPE,
+                String.format(MESSAGE_INVALID_COMMAND_FORMAT, FindCommand.MESSAGE_USAGE));
+
+        // m/ empty with availability — still an error
+        assertParseFailure(parser, " " + PREFIX_MATCH_TYPE + " "
+                        + PREFIX_AVAILABILITY + "MONDAY,14:00,17:00",
+                String.format(MESSAGE_INVALID_COMMAND_FORMAT, FindCommand.MESSAGE_USAGE));
+    }
+
 }

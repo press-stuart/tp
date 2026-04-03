@@ -16,33 +16,212 @@ import seedu.address.model.person.predicates.PersonContainsFieldsPredicate;
 import seedu.address.model.person.predicates.PersonPredicate;
 
 /**
- * Parses input arguments and creates a new FindCommand object.
+ * Parses input arguments and creates a new {@code FindCommand}.
  *
- * <p>Accepted formats:
+ * <h3>Command format</h3>
+ * <pre>find [m/MATCH_TYPE] [va/DAY,HH:mm,HH:mm] [KEYWORD ...]</pre>
+ *
+ * <p>Both prefixes are optional and may appear in any order.
+ * Keywords always trail after the last prefix (or stand alone when no prefix is used).
+ *
+ * <h3>Accepted forms</h3>
  * <ul>
- *   <li>{@code find KEYWORD [MORE_KEYWORDS]}</li>
- *   <li>{@code find m/MATCH_TYPE KEYWORD [MORE_KEYWORDS]}</li>
- *   <li>{@code find va/DAY,HH:mm,HH:mm [KEYWORD ...]}</li>
- *   <li>{@code find m/MATCH_TYPE va/DAY,HH:mm,HH:mm KEYWORD [MORE_KEYWORDS]}</li>
+ *   <li>{@code find alice bob}             — keyword search only</li>
+ *   <li>{@code find m/ss ali}              — substring search only</li>
+ *   <li>{@code find va/MONDAY,14:00,17:00} — availability filter only</li>
+ *   <li>{@code find m/kw va/MONDAY,14:00,17:00 alice} — both (AND)</li>
+ *   <li>{@code find va/MONDAY,14:00,17:00 m/kw alice} — both (AND, swapped prefix order)</li>
  * </ul>
+ *
+ * <h3>Validation rules</h3>
+ * <ul>
+ *   <li>At least one of keywords or {@code va/} must be present.</li>
+ *   <li>If {@code m/} is present, at least one keyword must also be present
+ *       (a match type without keywords is meaningless).</li>
+ *   <li>No text may appear before the first prefix (preamble must be empty
+ *       when any prefix is used).</li>
+ * </ul>
+ *
+ * <h3>How ArgumentTokenizer assigns trailing content</h3>
+ * <p>{@code ArgumentTokenizer} splits the input by prefix positions. Each prefix's
+ * value spans from just after the prefix to just before the next prefix (or end of input).
+ * This means trailing keywords are always attached to whichever prefix appears last.
+ * For example:
+ * <ul>
+ *   <li>{@code m/kw va/MONDAY,14:00,17:00 alice}
+ *       → m/="kw", va/="MONDAY,14:00,17:00 alice"</li>
+ *   <li>{@code va/MONDAY,14:00,17:00 m/kw alice}
+ *       → va/="MONDAY,14:00,17:00", m/="kw alice"</li>
+ * </ul>
+ * <p>The parser extracts each prefix's primary token (match type or availability),
+ * then collects any remaining tokens as keywords.
  */
 public class FindCommandParser implements Parser<FindCommand> {
-    /**
-     * Parses the given {@code String} of arguments in the context of the FindCommand
-     * and returns a FindCommand object for execution.
-     *
-     * @throws ParseException if the user input does not conform the expected format
-     */
+
+    @Override
     public FindCommand parse(String args) throws ParseException {
+        ParsedFindArgs parsed = parseArgs(args);
+        validate(parsed);
+        PersonPredicate predicate = buildPredicate(parsed);
+        return new FindCommand(predicate);
+    }
+
+    /**
+     * Parses the raw argument string into a {@code ParsedFindArgs}.
+     *
+     * <p>The method:
+     * <ol>
+     *   <li>Tokenizes the input, splitting by {@code m/} and {@code va/} prefixes.</li>
+     *   <li>Rejects any text appearing before the first prefix (preamble).</li>
+     *   <li>Extracts the match type from {@code m/} (first token of its value).</li>
+     *   <li>Extracts the availability from {@code va/} (first token of its value).</li>
+     *   <li>Collects keywords from trailing tokens of whichever prefix is last,
+     *       or from the preamble if no prefix is used.</li>
+     * </ol>
+     */
+    private ParsedFindArgs parseArgs(String args) throws ParseException {
         ArgumentMultimap argMultimap = ArgumentTokenizer.tokenize(
                 " " + args, PREFIX_MATCH_TYPE, PREFIX_AVAILABILITY);
         argMultimap.verifyNoDuplicatePrefixesFor(PREFIX_MATCH_TYPE, PREFIX_AVAILABILITY);
 
-        ParsedFindArgs parsed = parseFindArgs(argMultimap);
+        Optional<String> rawMatchType = argMultimap.getValue(PREFIX_MATCH_TYPE);
+        Optional<String> rawAvail = argMultimap.getValue(PREFIX_AVAILABILITY);
+        String preamble = argMultimap.getPreamble().trim();
+        boolean hasAnyPrefix = rawMatchType.isPresent() || rawAvail.isPresent();
 
-        boolean hasMatchType = argMultimap.getValue(PREFIX_MATCH_TYPE).isPresent();
-        boolean hasKeywords = !parsed.keywords().isEmpty();
-        boolean hasAvailability = parsed.availability().isPresent();
+        // Rule: no free-standing text before the first prefix.
+        if (!preamble.isEmpty() && hasAnyPrefix) {
+            throw new ParseException(
+                    String.format(MESSAGE_INVALID_COMMAND_FORMAT, FindCommand.MESSAGE_USAGE));
+        }
+
+        FindMatchType matchType = parseMatchType(rawMatchType);
+        VolunteerAvailability availability = parseAvailability(rawAvail);
+        List<String> keywords = collectKeywords(rawMatchType, rawAvail, preamble, matchType);
+
+        return new ParsedFindArgs(matchType, availability, keywords);
+    }
+
+    /**
+     * Extracts the match type from the {@code m/} value.
+     *
+     * @return the parsed {@code FindMatchType}, or {@code null} if {@code m/} was not provided.
+     * @throws ParseException if {@code m/} is present but empty or contains an invalid token.
+     */
+    private FindMatchType parseMatchType(Optional<String> rawMatchType) throws ParseException {
+        if (rawMatchType.isEmpty()) {
+            return null;
+        }
+
+        String trimmed = rawMatchType.get().trim();
+
+        // m/ was provided but empty (e.g. "find m/ va/...")
+        if (trimmed.isEmpty()) {
+            throw new ParseException(
+                    String.format(MESSAGE_INVALID_COMMAND_FORMAT, FindCommand.MESSAGE_USAGE));
+        }
+
+        // First token is the match type; any remaining tokens are keywords (handled later).
+        String matchTypeToken = ParserUtil.tokenizeSpaceSeparated(trimmed).get(0);
+        return FindMatchType.fromToken(matchTypeToken)
+                .orElseThrow(() -> new ParseException(
+                        String.format(MESSAGE_INVALID_COMMAND_FORMAT, FindCommand.MESSAGE_USAGE)));
+    }
+
+    /**
+     * Extracts the availability from the {@code va/} value.
+     *
+     * @return the parsed {@code VolunteerAvailability}, or {@code null} if {@code va/} was not provided.
+     * @throws ParseException if {@code va/} is present but empty or contains an invalid availability.
+     */
+    private VolunteerAvailability parseAvailability(Optional<String> rawAvail) throws ParseException {
+        if (rawAvail.isEmpty()) {
+            return null;
+        }
+
+        String trimmed = rawAvail.get().trim();
+
+        // va/ was provided but empty (e.g. "find va/")
+        if (trimmed.isEmpty()) {
+            throw new ParseException(
+                    String.format(MESSAGE_INVALID_COMMAND_FORMAT, FindCommand.MESSAGE_USAGE));
+        }
+
+        // First token is the availability; any remaining tokens are keywords (handled later).
+        String availToken = ParserUtil.tokenizeSpaceSeparated(trimmed).get(0);
+        if (!VolunteerAvailability.isValidAvailability(availToken)) {
+            throw new ParseException(
+                    String.format(MESSAGE_INVALID_COMMAND_FORMAT, FindCommand.MESSAGE_USAGE));
+        }
+        return VolunteerAvailability.fromString(availToken);
+    }
+
+    /**
+     * Collects keywords from the appropriate source.
+     *
+     * <p>Keywords can come from exactly one of three places:
+     * <ol>
+     *   <li>Trailing tokens in the {@code m/} value (when {@code m/} is the last prefix).</li>
+     *   <li>Trailing tokens in the {@code va/} value (when {@code va/} is the last prefix).</li>
+     *   <li>The preamble (when no prefix is used, e.g. {@code find alice bob}).</li>
+     * </ol>
+     *
+     * <p>"Trailing tokens" means everything after the first token (which is the primary
+     * value of that prefix — the match type or availability string).
+     *
+     * @param matchType the parsed match type, used to determine how many tokens to skip
+     *                  in the m/ value (1 if match type was parsed, 0 if not).
+     */
+    private List<String> collectKeywords(Optional<String> rawMatchType, Optional<String> rawAvail,
+            String preamble, FindMatchType matchType) {
+        // Try m/ trailing tokens (keywords appear here when m/ is the last prefix).
+        List<String> matchTypeTokens = tokenizeOptional(rawMatchType);
+        // Skip the first token (the match type itself) if a valid match type was parsed.
+        int matchTypeSkip = matchType != null ? 1 : 0;
+        if (matchTypeTokens.size() > matchTypeSkip) {
+            return matchTypeTokens.subList(matchTypeSkip, matchTypeTokens.size());
+        }
+
+        // Try va/ trailing tokens (keywords appear here when va/ is the last prefix).
+        List<String> availTokens = tokenizeOptional(rawAvail);
+        // Skip the first token (the availability string itself) if va/ was provided.
+        if (availTokens.size() > 1) {
+            return availTokens.subList(1, availTokens.size());
+        }
+
+        // No prefix — keywords come from preamble (e.g. "find alice bob").
+        if (!preamble.isEmpty()) {
+            return ParserUtil.tokenizeSpaceSeparated(preamble);
+        }
+
+        return List.of();
+    }
+
+    /**
+     * Tokenizes an optional prefix value into space-separated tokens.
+     * Returns an empty list if the value is absent or blank.
+     */
+    private List<String> tokenizeOptional(Optional<String> rawValue) {
+        if (rawValue.isEmpty()) {
+            return List.of();
+        }
+        String trimmed = rawValue.get().trim();
+        if (trimmed.isEmpty()) {
+            return List.of();
+        }
+        return ParserUtil.tokenizeSpaceSeparated(trimmed);
+    }
+
+    /**
+     * Validates the parsed arguments.
+     *
+     * @throws ParseException if neither keywords nor availability is present,
+     *     or if a match type is specified without any keywords.
+     */
+    private void validate(ParsedFindArgs parsed) throws ParseException {
+        boolean hasKeywords = !parsed.keywords.isEmpty();
+        boolean hasAvailability = parsed.availability != null;
+        boolean hasMatchType = parsed.matchType != null;
 
         if (!hasKeywords && !hasAvailability) {
             throw new ParseException(
@@ -53,198 +232,61 @@ public class FindCommandParser implements Parser<FindCommand> {
             throw new ParseException(
                     String.format(MESSAGE_INVALID_COMMAND_FORMAT, FindCommand.MESSAGE_USAGE));
         }
-
-        PersonPredicate predicate = buildPredicate(parsed);
-        return new FindCommand(predicate);
     }
 
     /**
-     * Parses the argument multimap into match type, availability, and keywords.
+     * Builds the appropriate predicate based on which arguments are present.
      *
-     * <p>Keywords are extracted from the trailing content of the last prefix present,
-     * or from the preamble when no prefixes are used.
-     */
-    private ParsedFindArgs parseFindArgs(ArgumentMultimap argMultimap) throws ParseException {
-        Optional<String> matchTypeValue = argMultimap.getValue(PREFIX_MATCH_TYPE);
-        Optional<String> availValue = argMultimap.getValue(PREFIX_AVAILABILITY);
-        String preamble = argMultimap.getPreamble().trim();
-
-        boolean hasMatchType = matchTypeValue.isPresent();
-        boolean hasAvail = availValue.isPresent();
-
-        // Preamble must be empty when any prefix is used
-        if (!preamble.isEmpty() && (hasMatchType || hasAvail)) {
-            throw new ParseException(
-                    String.format(MESSAGE_INVALID_COMMAND_FORMAT, FindCommand.MESSAGE_USAGE));
-        }
-
-        FindMatchType matchType = parseMatchType(matchTypeValue, hasAvail);
-        Optional<VolunteerAvailability> availability = Optional.empty();
-        List<String> keywords = List.of();
-
-        if (hasAvail) {
-            // va/ present: first token is availability, rest are keywords
-            AvailabilityAndKeywords availResult = parseAvailabilityValue(availValue.get());
-            availability = Optional.of(availResult.availability());
-            keywords = availResult.keywords();
-        } else if (hasMatchType) {
-            // m/ only: keywords trail after match type token (existing behaviour)
-            keywords = parseKeywordsFromMatchType(matchTypeValue.get());
-        } else {
-            // No prefixes: keywords from preamble
-            if (!preamble.isEmpty()) {
-                keywords = ParserUtil.tokenizeSpaceSeparated(preamble);
-            }
-        }
-
-        return new ParsedFindArgs(matchType, availability, keywords);
-    }
-
-    /**
-     * Extracts the match type from the m/ value. When va/ is also present,
-     * the m/ value must contain exactly the match type token and nothing else.
-     */
-    private FindMatchType parseMatchType(Optional<String> matchTypeValue,
-            boolean hasAvail) throws ParseException {
-        if (matchTypeValue.isEmpty()) {
-            return FindMatchType.KEYWORD;
-        }
-
-        String trimmed = matchTypeValue.get().trim();
-        if (trimmed.isEmpty()) {
-            return FindMatchType.KEYWORD;
-        }
-
-        List<String> tokens = ParserUtil.tokenizeSpaceSeparated(trimmed);
-        FindMatchType matchType = FindMatchType.fromToken(tokens.get(0))
-                .orElseThrow(() -> new ParseException(
-                        String.format(MESSAGE_INVALID_COMMAND_FORMAT, FindCommand.MESSAGE_USAGE)));
-
-        if (hasAvail) {
-            // When va/ is present, m/ must only contain the match type token
-            if (tokens.size() > 1) {
-                throw new ParseException(
-                        String.format(MESSAGE_INVALID_COMMAND_FORMAT, FindCommand.MESSAGE_USAGE));
-            }
-            return matchType;
-        }
-
-        // When va/ is absent, keywords may trail after match type — handled separately
-        return matchType;
-    }
-
-    /**
-     * Extracts keywords from the m/ value after the match type token.
-     * Used only when va/ is absent.
-     */
-    private List<String> parseKeywordsFromMatchType(String matchTypeRaw) {
-        String trimmed = matchTypeRaw.trim();
-        if (trimmed.isEmpty()) {
-            return List.of();
-        }
-        List<String> tokens = ParserUtil.tokenizeSpaceSeparated(trimmed);
-        if (tokens.size() <= 1) {
-            return List.of();
-        }
-        return tokens.subList(1, tokens.size());
-    }
-
-    /**
-     * Parses the va/ value into an availability (first token) and trailing keywords.
-     */
-    private AvailabilityAndKeywords parseAvailabilityValue(String availRaw) throws ParseException {
-        String trimmed = availRaw.trim();
-        if (trimmed.isEmpty()) {
-            throw new ParseException(
-                    String.format(MESSAGE_INVALID_COMMAND_FORMAT, FindCommand.MESSAGE_USAGE));
-        }
-
-        List<String> tokens = ParserUtil.tokenizeSpaceSeparated(trimmed);
-        String availToken = tokens.get(0);
-
-        if (!VolunteerAvailability.isValidAvailability(availToken)) {
-            throw new ParseException(
-                    String.format(MESSAGE_INVALID_COMMAND_FORMAT, FindCommand.MESSAGE_USAGE));
-        }
-
-        VolunteerAvailability availability = VolunteerAvailability.fromString(availToken);
-        List<String> keywords = tokens.size() > 1
-                ? tokens.subList(1, tokens.size())
-                : List.of();
-
-        return new AvailabilityAndKeywords(availability, keywords);
-    }
-
-    /**
-     * Builds the appropriate predicate from parsed arguments.
+     * <ul>
+     *   <li>Keywords + availability → {@code CombinedAndPersonPredicate} (both must match).</li>
+     *   <li>Availability only → {@code PersonAvailableDuringPredicate}.</li>
+     *   <li>Keywords only → text predicate via {@code PersonContainsFieldsPredicateFactory}.</li>
+     * </ul>
+     *
+     * <p>When no explicit match type was provided, defaults to {@code FindMatchType.KEYWORD}.
      */
     private PersonPredicate buildPredicate(ParsedFindArgs parsed) {
-        boolean hasKeywords = !parsed.keywords().isEmpty();
-        boolean hasAvailability = parsed.availability().isPresent();
+        FindMatchType matchType = parsed.matchType != null
+                ? parsed.matchType
+                : FindMatchType.KEYWORD;
+        boolean hasKeywords = !parsed.keywords.isEmpty();
+        boolean hasAvailability = parsed.availability != null;
 
         if (hasKeywords && hasAvailability) {
             PersonContainsFieldsPredicate textPredicate =
-                    PersonContainsFieldsPredicateFactory.createPredicate(
-                            parsed.matchType(), parsed.keywords());
+                    PersonContainsFieldsPredicateFactory.createPredicate(matchType, parsed.keywords);
             PersonAvailableDuringPredicate availPredicate =
-                    new PersonAvailableDuringPredicate(parsed.availability().get());
+                    new PersonAvailableDuringPredicate(parsed.availability);
             return new CombinedAndPersonPredicate(List.of(textPredicate, availPredicate));
         }
 
         if (hasAvailability) {
-            return new PersonAvailableDuringPredicate(parsed.availability().get());
+            return new PersonAvailableDuringPredicate(parsed.availability);
         }
 
-        return PersonContainsFieldsPredicateFactory.createPredicate(
-                parsed.matchType(), parsed.keywords());
+        return PersonContainsFieldsPredicateFactory.createPredicate(matchType, parsed.keywords);
     }
 
     /**
-     * Stores all parsed arguments from a find command.
+     * Holds the parsed components of a find command.
+     *
+     * <p>Each field directly reflects what the user typed:
+     * <ul>
+     *   <li>{@code matchType} is {@code null} when {@code m/} was not provided.</li>
+     *   <li>{@code availability} is {@code null} when {@code va/} was not provided.</li>
+     *   <li>{@code keywords} is empty when no keywords were provided.</li>
+     * </ul>
      */
     private static final class ParsedFindArgs {
-        private final FindMatchType matchType;
-        private final Optional<VolunteerAvailability> availability;
-        private final List<String> keywords;
+        final FindMatchType matchType;
+        final VolunteerAvailability availability;
+        final List<String> keywords;
 
-        private ParsedFindArgs(FindMatchType matchType, Optional<VolunteerAvailability> availability,
+        ParsedFindArgs(FindMatchType matchType, VolunteerAvailability availability,
                 List<String> keywords) {
             this.matchType = matchType;
             this.availability = availability;
             this.keywords = keywords;
-        }
-
-        private FindMatchType matchType() {
-            return matchType;
-        }
-
-        private Optional<VolunteerAvailability> availability() {
-            return availability;
-        }
-
-        private List<String> keywords() {
-            return keywords;
-        }
-    }
-
-    /**
-     * Holds the parsed availability and trailing keywords from a va/ value.
-     */
-    private static final class AvailabilityAndKeywords {
-        private final VolunteerAvailability availability;
-        private final List<String> keywords;
-
-        private AvailabilityAndKeywords(VolunteerAvailability availability, List<String> keywords) {
-            this.availability = availability;
-            this.keywords = keywords;
-        }
-
-        private VolunteerAvailability availability() {
-            return availability;
-        }
-
-        private List<String> keywords() {
-            return keywords;
         }
     }
 }
