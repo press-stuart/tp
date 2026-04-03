@@ -133,6 +133,11 @@ public class ModelManager implements Model {
     }
 
     @Override
+    public void restorePerson(Person target) {
+        addressBook.restorePerson(target);
+    }
+
+    @Override
     public void addPerson(Person person) {
         addressBook.addPerson(person);
         updateFilteredKeptPersonList(PREDICATE_SHOW_ALL_PERSONS);

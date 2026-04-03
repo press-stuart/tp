@@ -86,6 +86,12 @@ public interface Model {
     void deletePerson(Person target);
 
     /**
+     * Restores the given person.
+     * The person must exist in the deleted persons list.
+     */
+    void restorePerson(Person target);
+
+    /**
      * Adds the given person.
      * {@code person} must not already exist in the address book.
      */
