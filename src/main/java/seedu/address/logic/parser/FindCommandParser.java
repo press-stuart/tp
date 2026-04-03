@@ -23,7 +23,7 @@ import seedu.address.model.person.predicates.PersonPredicate;
  *   <li>{@code find KEYWORD [MORE_KEYWORDS]}</li>
  *   <li>{@code find m/MATCH_TYPE KEYWORD [MORE_KEYWORDS]}</li>
  *   <li>{@code find va/DAY,HH:mm,HH:mm [KEYWORD ...]}</li>
- *   <li>{@code find m/MATCH_TYPE va/DAY,HH:mm,HH:mm [KEYWORD ...]}</li>
+ *   <li>{@code find m/MATCH_TYPE va/DAY,HH:mm,HH:mm KEYWORD [MORE_KEYWORDS]}</li>
  * </ul>
  */
 public class FindCommandParser implements Parser<FindCommand> {
