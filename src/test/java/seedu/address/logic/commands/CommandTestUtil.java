@@ -176,14 +176,23 @@ public class CommandTestUtil {
     }
 
     /**
-     * Convenience wrapper to {@link #assertCommandFailure(Command, Model, PersonListView, String)} that takes a string
-     * {@code expectedMessage} and uses {@code PersonListView.KEPT_PERSONS} as the default view.
+     * Executes the given {@code command}, confirms that <br>
+     * - a {@code CommandException} is thrown <br>
+     * - the CommandException message matches {@code expectedMessage} <br>
+     * - the address book, filtered person list and selected person in {@code actualModel} remain unchanged
      *
      * @deprecated Use {@link #assertCommandFailure(Command, Model, PersonListView, String)} instead.
      */
     @Deprecated
     public static void assertCommandFailure(Command command, Model actualModel, String expectedMessage) {
-        assertCommandFailure(command, actualModel, PersonListView.KEPT_PERSONS, expectedMessage);
+        // we are unable to defensively copy the model for comparison later, so we can
+        // only do so by copying its components.
+        AddressBook expectedAddressBook = new AddressBook(actualModel.getAddressBook());
+        List<Person> expectedFilteredList = new ArrayList<>(actualModel.getFilteredKeptPersonList());
+
+        assertThrows(CommandException.class, expectedMessage, () -> command.execute(actualModel));
+        assertEquals(expectedAddressBook, actualModel.getAddressBook());
+        assertEquals(expectedFilteredList, actualModel.getFilteredKeptPersonList());
     }
 
     /**
