@@ -105,7 +105,10 @@ public class CommandTestUtil {
      * Executes the given {@code command}, confirms that <br>
      * - the returned {@link CommandResult} matches {@code expectedCommandResult} <br>
      * - the {@code actualModel} matches {@code expectedModel}
+     *
+     * @deprecated Use {@link #assertCommandSuccess(Command, Model, PersonListView, CommandResult, Model)} instead.
      */
+    @Deprecated
     public static void assertCommandSuccess(Command command, Model actualModel, CommandResult expectedCommandResult,
             Model expectedModel) {
         try {
@@ -136,7 +139,11 @@ public class CommandTestUtil {
     /**
      * Convenience wrapper to {@link #assertCommandSuccess(Command, Model, CommandResult, Model)}
      * that takes a string {@code expectedMessage}.
+     *
+     * @deprecated Use {@link #assertCommandSuccess(Command, Model, PersonListView, String, PersonListView, Model)}
+     *         instead.
      */
+    @Deprecated
     public static void assertCommandSuccess(Command command, Model actualModel, String expectedMessage,
             Model expectedModel) {
         CommandResult expectedCommandResult = new CommandResult(expectedMessage);
@@ -146,7 +153,11 @@ public class CommandTestUtil {
     /**
      * Convenience wrapper to {@link #assertCommandSuccess(Command, Model, CommandResult, Model)}
      * that takes a string {@code expectedMessage} and PersonListView {@code expectedPersonListView}.
+     *
+     * @deprecated Use {@link #assertCommandSuccess(Command, Model, PersonListView, String, PersonListView, Model)}
+     *         instead.
      */
+    @Deprecated
     public static void assertCommandSuccess(Command command, Model actualModel, String expectedMessage,
             PersonListView expectedPersonListView, Model expectedModel) {
         CommandResult expectedCommandResult = new CommandResult(expectedMessage, expectedPersonListView);
