@@ -44,7 +44,7 @@ public class ImportCommand extends Command {
     }
 
     @Override
-    public CommandResult execute(Model model) throws CommandException {
+    public CommandResult execute(Model model, PersonListView personListView) throws CommandException {
         requireNonNull(model);
 
         CsvImportFileResult result;
