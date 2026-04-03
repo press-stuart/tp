@@ -161,7 +161,7 @@ This section describes some noteworthy details on how certain features are imple
 
 ### Find command
 
-The `find` command is implemented as a small "pipeline" that converts user input into one or more `PersonPredicate` objects, and then updates the model's filtered person list by applying the resulting predicate. The command supports text-based keyword matching (via `m/` prefix) and volunteer availability filtering (via `va/` prefix), either independently or combined. The diagram below summarizes the key classes and their relationships.
+The `find` command is implemented as a small "pipeline" that converts user input into a single `PersonPredicate` object, and then updates the model's filtered person list by applying that predicate. The command supports text-based keyword matching (via `m/` prefix) and volunteer availability filtering (via `va/` prefix), either independently or combined. The diagram below summarizes the key classes and their relationships.
 
 ![Find Command Class Diagram](images/FindCommandClassDiagram.png)
 
@@ -173,7 +173,7 @@ The sequence diagram below shows how the `find` command arguments are transforme
 
 The parsing flow is as follows:
 * `LogicManager` calls `AddressBookParser#parseCommand()`, which instantiates a `FindCommandParser` for the `find` command.
-* `FindCommandParser#parseFindArgs(...)` processes the argument multimap:
+* `FindCommandParser#parseArgs(...)` processes the argument multimap:
   * If the user provides an `m/` prefix, `FindMatchType.fromToken()` determines the match type; otherwise the default keyword match type is assumed.
   * If the user provides a `va/` prefix, `VolunteerAvailability.fromString()` parses the availability time period.
   * Keywords are extracted from the trailing content after the last prefix, or from the preamble when no prefixes are used.
@@ -194,8 +194,7 @@ All find predicates implement `PersonPredicate`, which is a `Predicate<Person>`.
 * returns `true` as soon as any keyword matches any supported field (i.e. `OR` semantics across keywords)
 * checks the keyword against most `Person` fields (e.g. name, phone, email, address, role, notes, tags)
 * delegates the actual field-matching logic to `matchesField(...)`
-
-Concrete predicate classes implement the `matchesField(...)` method, keeping the overall matching logic consistent and easy to extend.
+* concrete predicate classes implement the `matchesField(...)` method, keeping the overall matching logic consistent and easy to extend
 
 **`PersonAvailableDuringPredicate`** checks whether any of a person's `VolunteerAvailability` entries fully cover the queried time period (same day, starts at or before query start, ends at or after query end).
 
@@ -213,7 +212,7 @@ To add a new text match type in the future:
 To add a new filter dimension (like availability):
 
 * implement a new `PersonPredicate` subclass
-* integrate it into `FindCommandParser#parseFindArgs(...)` and `buildPredicate(...)`
+* integrate it into `FindCommandParser#parseArgs(...)` and `buildPredicate(...)`
 * `CombinedAndPersonPredicate` can compose any number of predicates together
 
 ### \[Proposed\] Undo/redo feature
