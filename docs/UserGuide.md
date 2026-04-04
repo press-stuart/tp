@@ -230,19 +230,21 @@ Examples:
 
 Restores the specified persons from RosterBolt.
 
-You must be viewing the recycle bin to use this command.
+You must be viewing the recycle bin to use this command. Otherwise, an error message will be shown, and no persons will be restored.
 
 Format: `restore INDEX [MORE_INDICES]`
 
 * Restores the person at the specified indices.
-* Indices refer to index numbers shown in the displayed person list.
+* Indices refer to index numbers shown in the displayed recycle bin.
 * Indices **must be positive integers** 1, 2, 3, …​
+* Duplicate indices will be ignored.
 * Restored persons will be removed from the recycle bin and added to the working list of kept contacts.
 * You cannot restore persons who are duplicates of existing contacts in the working list.
 * You cannot restore two persons who are duplicates of each other in the recycle bin.
 
 Examples:
 * `bin` followed by `restore 2 3` restores the 2nd and 3rd persons in the recycle bin.
+* `bin` followed by `restore 3 3 2` has the same behavior, as duplicate indices are ignored and the order of indices does not matter.
 
 ### Clearing all entries : `clear`
 
