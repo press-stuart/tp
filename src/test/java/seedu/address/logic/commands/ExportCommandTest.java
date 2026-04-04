@@ -15,6 +15,7 @@ import org.junit.jupiter.api.io.TempDir;
 
 import javafx.collections.ObservableList;
 import seedu.address.commons.core.GuiSettings;
+import seedu.address.logic.PersonListView;
 import seedu.address.model.AddressBook;
 import seedu.address.model.Model;
 import seedu.address.model.ReadOnlyAddressBook;
@@ -37,6 +38,7 @@ public class ExportCommandTest {
 
         assertEquals(String.format(ExportCommand.MESSAGE_SUCCESS, 0, outputFile),
                 result.getFeedbackToUser());
+        assertEquals(PersonListView.KEPT_PERSONS, result.getPersonListView());
 
         assertTrue(Files.exists(outputFile));
         String content = Files.readString(outputFile);
@@ -76,6 +78,7 @@ public class ExportCommandTest {
 
         assertEquals(String.format(ExportCommand.MESSAGE_SUCCESS, 2, outputFile),
                 result.getFeedbackToUser());
+        assertEquals(PersonListView.KEPT_PERSONS, result.getPersonListView());
 
         assertTrue(Files.exists(outputFile));
 
@@ -115,11 +118,20 @@ public class ExportCommandTest {
 
         assertEquals(String.format(ExportCommand.MESSAGE_SUCCESS, 1, outputFile),
                 result.getFeedbackToUser());
+        assertEquals(PersonListView.KEPT_PERSONS, result.getPersonListView());
 
         String content = Files.readString(outputFile);
         assertTrue(content.contains("name,phone,email,address,role,notes,tags,availabilities,records"));
         assertTrue(content.contains("Alice Pauline"));
         assertTrue(!content.contains("old content"));
+    }
+
+    @Test
+    public void toStringMethod() {
+        Path filePath = Path.of("data/volunteers.csv");
+        ExportCommand exportCommand = new ExportCommand(filePath);
+        String expected = ExportCommand.class.getCanonicalName() + "{filePath=" + filePath + "}";
+        assertEquals(expected, exportCommand.toString());
     }
 
     /**
@@ -215,18 +227,46 @@ public class ExportCommandTest {
         }
 
         @Override
-        public ObservableList<Person> getFilteredPersonList() {
+        public ObservableList<Person> getFilteredKeptPersonList() {
             fail("This method should not be called.");
             return null;
         }
 
         @Override
-        public void updateFilteredPersonList(Predicate<Person> predicate) {
+        public ObservableList<Person> getKeptPersonList() {
+            fail("This method should not be called.");
+            return null;
+        }
+
+        @Override
+        public ObservableList<Person> getFilteredDeletedPersonList() {
+            fail("This method should not be called.");
+            return null;
+        }
+
+        @Override
+        public void deleteAllPersons() {
+            fail("This method should not be called.");
+        }
+
+        @Override
+        public void updateFilteredKeptPersonList(Predicate<Person> predicate) {
             fail("This method should not be called.");
         }
 
         @Override
         public void updateSortedPersonList(Comparator<Person> comparator) {
+            fail("This method should not be called.");
+        }
+
+        @Override
+        public String getLastCommandText() {
+            fail("This method should not be called.");
+            return null;
+        }
+
+        @Override
+        public void setLastCommandText(String commandText) {
             fail("This method should not be called.");
         }
     }
@@ -244,6 +284,11 @@ public class ExportCommandTest {
         @Override
         public ReadOnlyAddressBook getAddressBook() {
             return addressBook;
+        }
+
+        @Override
+        public ObservableList<Person> getKeptPersonList() {
+            return addressBook.getKeptPersonList();
         }
     }
 }

@@ -25,9 +25,11 @@ public class ModelManager implements Model {
 
     private final AddressBook addressBook;
     private final UserPrefs userPrefs;
-    private final FilteredList<Person> filteredPersons;
+    private final FilteredList<Person> filteredKeptPersons;
+    private final FilteredList<Person> filteredDeletedPersons;
     private final SortedList<Person> sortedPersons;
     private Comparator<Person> sortComparator;
+    private String lastCommandText;
 
     /**
      * Initializes a ModelManager with the given addressBook and userPrefs.
@@ -39,8 +41,9 @@ public class ModelManager implements Model {
 
         this.addressBook = new AddressBook(addressBook);
         this.userPrefs = new UserPrefs(userPrefs);
-        filteredPersons = new FilteredList<>(this.addressBook.getPersonList());
-        sortedPersons = new SortedList<>(filteredPersons);
+        filteredKeptPersons = new FilteredList<>(this.addressBook.getKeptPersonList());
+        filteredDeletedPersons = new FilteredList<>(this.addressBook.getDeletedPersonList());
+        sortedPersons = new SortedList<>(filteredKeptPersons);
         sortComparator = null;
     }
 
@@ -121,48 +124,69 @@ public class ModelManager implements Model {
     @Override
     public boolean hasPerson(Person person) {
         requireNonNull(person);
-        return addressBook.hasPerson(person);
+        return addressBook.hasKeptPerson(person);
     }
 
     @Override
     public void deletePerson(Person target) {
-        addressBook.removePerson(target);
+        addressBook.deletePerson(target);
     }
 
     @Override
     public void addPerson(Person person) {
         addressBook.addPerson(person);
-        updateFilteredPersonList(PREDICATE_SHOW_ALL_PERSONS);
+        updateFilteredKeptPersonList(PREDICATE_SHOW_ALL_PERSONS);
     }
 
     @Override
     public void setPerson(Person target, Person editedPerson) {
         requireAllNonNull(target, editedPerson);
 
-        addressBook.setPerson(target, editedPerson);
+        addressBook.setKeptPerson(target, editedPerson);
+    }
+
+    @Override
+    public void deleteAllPersons() {
+        addressBook.deleteAllPersons();
     }
 
     //=========== Filtered Person List Accessors =============================================================
 
-    /**
-     * Returns an unmodifiable view of the list of {@code Person} backed by the internal list of
-     * {@code versionedAddressBook}
-     */
     @Override
-    public ObservableList<Person> getFilteredPersonList() {
+    public ObservableList<Person> getFilteredKeptPersonList() {
         return sortedPersons;
     }
 
     @Override
-    public void updateFilteredPersonList(Predicate<Person> predicate) {
+    public ObservableList<Person> getKeptPersonList() {
+        return addressBook.getKeptPersonList();
+    }
+
+    @Override
+    public ObservableList<Person> getFilteredDeletedPersonList() {
+        return filteredDeletedPersons;
+    }
+
+    @Override
+    public void updateFilteredKeptPersonList(Predicate<Person> predicate) {
         requireNonNull(predicate);
-        filteredPersons.setPredicate(predicate);
+        filteredKeptPersons.setPredicate(predicate);
     }
 
     @Override
     public void updateSortedPersonList(Comparator<Person> comparator) {
         sortComparator = comparator;
         sortedPersons.setComparator(comparator);
+    }
+
+    @Override
+    public String getLastCommandText() {
+        return lastCommandText;
+    }
+
+    @Override
+    public void setLastCommandText(String commandText) {
+        this.lastCommandText = commandText;
     }
 
     @Override
@@ -179,7 +203,8 @@ public class ModelManager implements Model {
         ModelManager otherModelManager = (ModelManager) other;
         return addressBook.equals(otherModelManager.addressBook)
                 && userPrefs.equals(otherModelManager.userPrefs)
-                && filteredPersons.equals(otherModelManager.filteredPersons)
+                && filteredKeptPersons.equals(otherModelManager.filteredKeptPersons)
+                && filteredDeletedPersons.equals(otherModelManager.filteredDeletedPersons)
                 && Objects.equals(sortComparator, otherModelManager.sortComparator);
     }
 

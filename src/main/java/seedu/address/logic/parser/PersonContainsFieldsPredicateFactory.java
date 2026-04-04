@@ -10,23 +10,23 @@ import seedu.address.model.person.predicates.PersonContainsSubstringsPredicate;
 /**
  * Creates {@code PersonContainsFieldsPredicate} instances for supported find match types.
  */
-public final class FindMatchTypeFactory {
+public final class PersonContainsFieldsPredicateFactory {
 
-    private FindMatchTypeFactory() {
-        throw new UnsupportedOperationException("This is a utility class and cannot be instantiated");
+    private PersonContainsFieldsPredicateFactory() {
+        throw new UnsupportedOperationException("This is a factory class and cannot be instantiated");
     }
 
     /**
      * Returns a {@code PersonContainsFieldsPredicate} for the given match type and keywords.
      */
     public static PersonContainsFieldsPredicate createPredicate(FindMatchType matchType, List<String> keywords) {
-        if (matchType == FindMatchType.KEYWORD) {
-            return new PersonContainsKeywordsPredicate(keywords);
-        } else if (matchType == FindMatchType.SUBSTRING) {
-            return new PersonContainsSubstringsPredicate(keywords);
-        } else if (matchType == FindMatchType.FUZZY) {
-            return new PersonContainsFuzzyKeywordsPredicate(keywords);
-        }
-        throw new IllegalStateException("Unsupported FindMatchType: " + matchType);
+        // Indented case blocks in lambda-style switch statements are allowed
+        // CHECKSTYLE.OFF: Indentation
+        return switch (matchType) {
+            case KEYWORD -> new PersonContainsKeywordsPredicate(keywords);
+            case SUBSTRING -> new PersonContainsSubstringsPredicate(keywords);
+            case FUZZY -> new PersonContainsFuzzyKeywordsPredicate(keywords);
+        };
+        // CHECKSTYLE.ON: Indentation
     }
 }

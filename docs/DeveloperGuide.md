@@ -103,7 +103,7 @@ How the `Logic` component works:
 1. When `Logic` is called upon to execute a command, it is passed to an `AddressBookParser` object which in turn creates a parser that matches the command (e.g., `DeleteCommandParser`) and uses it to parse the command.
 1. This results in a `Command` object (more precisely, an object of one of its subclasses e.g., `DeleteCommand`) which is executed by the `LogicManager`.
 1. The command can communicate with the `Model` when it is executed (e.g. to delete a person).<br>
-   Note that although this is shown as a single step in the diagram above (for simplicity), in the code it can take several interactions (between the command object and the `Model`) to achieve.
+   Note that in the sequence diagram above, the interactions between the command object and the `Model` are simplified.
 1. The result of the command execution is encapsulated as a `CommandResult` object which is returned back from `Logic`.
 
 Here are the other classes in `Logic` (omitted from the class diagram above) that are used for parsing a user command:
@@ -113,17 +113,20 @@ Here are the other classes in `Logic` (omitted from the class diagram above) tha
 How the parsing works:
 * When called upon to parse a user command, the `AddressBookParser` class creates an `XYZCommandParser` (`XYZ` is a placeholder for the specific command name e.g., `AddCommandParser`) which uses the other classes shown above to parse the user command and create a `XYZCommand` object (e.g., `AddCommand`) which the `AddressBookParser` returns back as a `Command` object.
 * All `XYZCommandParser` classes (e.g., `AddCommandParser`, `DeleteCommandParser`, ...) inherit from the `Parser` interface so that they can be treated similarly where possible e.g, during testing.
-* Alias validation uses `CommandWords` as the canonical list of built-in command words. When adding a new top-level command, update both `AddressBookParser` and `CommandWords` so the new command remains aliasable.
+* Alias validation uses `CommandWords` as the canonical source of reserved command words and allowed alias targets. `TOP_LEVEL_COMMAND_WORDS` defines reserved command words, while allowed alias targets are derived from it by excluding disallowed meta-commands. When adding a new top-level command, update both `AddressBookParser` and `CommandWords` so parsing and alias behavior stay in sync.
 
 ### Model component
 **API** : [`Model.java`](https://github.com/AY2526S2-CS2103T-T12-1/tp/tree/master/src/main/java/seedu/address/model/Model.java)
 
 <img src="images/ModelClassDiagram.png" width="450" />
 
+Continuing the example of the `delete` command, the `Model` component executes the `deletePerson` method with a `Person p` as its argument. The sequence diagram below illustrates the interactions within the `Model` component.
+
+![Interactions Inside the Model Component for the `deletePerson` API Call](images/DeleteModelSequenceDiagram.png)
 
 The `Model` component,
 
-* stores the address book data i.e., all `Person` objects (which are contained in a `UniquePersonList` object).
+* stores the address book data i.e., all `Person` objects. `Person` objects in the user's current list of contacts are contained in a `UniquePersonList` object. `Person` objects corresponding to contacts that are deleted in the current session are stored in a separate `DeletedPersonList` object.
 * stores the currently 'selected' `Person` objects (e.g., results of a search query) as a separate _filtered_ list which is exposed to outsiders as a _sorted_ and unmodifiable `ObservableList<Person>` that can be 'observed' e.g. the UI can be bound to this list so that the UI automatically updates when the data in the list change. Sorting is driven by a comparator set on the `Model`, and defaults to insertion order when no comparator is set.
 * stores a `UserPref` object that represents the user’s preferences. This is exposed to the outside as a `ReadOnlyUserPref` objects.
 * does not depend on any of the other three components (as the `Model` represents data entities of the domain, they should make sense on their own without depending on other components)
@@ -158,7 +161,7 @@ This section describes some noteworthy details on how certain features are imple
 
 ### Find command
 
-The `find` command is implemented as a small "pipeline" that converts user input into a match-type-specific `PersonContainsFieldsPredicate`, and then updates the model's filtered person list by applying that predicate to the active person list. The diagram below summarizes the key classes and their relationships, abstracting predicate creation behind a `FindMatchTypeFactory` helper for clarity.
+The `find` command is implemented as a small "pipeline" that converts user input into a single `PersonPredicate` object, and then updates the model's filtered person list by applying that predicate. The command supports text-based keyword matching (via `m/` prefix) and volunteer availability filtering (via `va/` prefix), either independently or combined. The diagram below summarizes the key classes and their relationships.
 
 ![Find Command Class Diagram](images/FindCommandClassDiagram.png)
 
@@ -170,29 +173,47 @@ The sequence diagram below shows how the `find` command arguments are transforme
 
 The parsing flow is as follows:
 * `LogicManager` calls `AddressBookParser#parseCommand()`, which instantiates a `FindCommandParser` for the `find` command.
-* If the user provides an `m/` prefix, `FindMatchType.fromToken()` is used to determine the match type before `ParsedFindArgs` is created; otherwise the default match type (i.e. keyword match type) is assumed when building `ParsedFindArgs`.
-* `FindMatchTypeFactory.createPredicate(...)` returns a predicate object for the provided match type, which is a concrete subclass of `PersonContainsFieldsPredicate`.
+* `FindCommandParser#parseArgs(...)` processes the argument multimap:
+  * If the user provides an `m/` prefix, `FindMatchType.fromToken()` determines the match type; otherwise the default keyword match type is assumed.
+  * If the user provides a `va/` prefix, `VolunteerAvailability.fromString()` parses the availability time period.
+  * Keywords are extracted from the trailing content after the last prefix, or from the preamble when no prefixes are used.
+  * All parsed arguments are stored in a `ParsedFindArgs` object.
+* `FindCommandParser#buildPredicate(...)` creates the appropriate predicate:
+  * **Keywords only**: `PersonContainsFieldsPredicateFactory.createPredicate(...)` returns a text-matching predicate.
+  * **Availability only**: a `PersonAvailableDuringPredicate` is created, which checks that a volunteer's availability fully covers the queried time period.
+  * **Both keywords and availability**: a `CombinedAndPersonPredicate` is created, which ANDs the text predicate and availability predicate together.
 * `FindCommandParser` constructs the `FindCommand` with the predicate and returns it to `AddressBookParser`, which returns it to `LogicManager`.
 
 #### Predicate structure
 
-All find predicates implement `PersonPredicate`, which is a `Predicate<Person>`. The current implementation provides a shared abstract base class (`PersonContainsFieldsPredicate`) that:
+All find predicates implement `PersonPredicate`, which is a `Predicate<Person>`. There are three families of predicates:
+
+**Text-matching predicates** share an abstract base class (`PersonContainsFieldsPredicate`) that:
 
 * iterates through each keyword
 * returns `true` as soon as any keyword matches any supported field (i.e. `OR` semantics across keywords)
 * checks the keyword against most `Person` fields (e.g. name, phone, email, address, role, notes, tags)
 * delegates the actual field-matching logic to `matchesField(...)`
+* concrete predicate classes implement the `matchesField(...)` method, keeping the overall matching logic consistent and easy to extend
 
-Concrete predicate classes will implement the `matchesField(...)` method, keeping the overall matching logic consistent and easy to extend.
+**`PersonAvailableDuringPredicate`** checks whether any of a person's `VolunteerAvailability` entries fully cover the queried time period (same day, starts at or before query start, ends at or after query end).
+
+**`CombinedAndPersonPredicate`** takes a list of `PersonPredicate` objects and requires all of them to match (AND logic). This is used when both keywords and availability are specified.
 
 #### Extending find
 
-To add a new match type or predicate in the future:
+To add a new text match type in the future:
 
 * implement a new subclass of `PersonContainsFieldsPredicate`
 * add a new enum value and token in `FindMatchType`
-* update `FindMatchTypeFactory.createPredicate(...)` to return the new predicate for that match type
+* update `PersonContainsFieldsPredicateFactory.createPredicate(...)` to return the new predicate for that match type
 * update any docs that mention match types (the parser logic does not need to change if the match type continues to be provided via `m/`)
+
+To add a new filter dimension (like availability):
+
+* implement a new `PersonPredicate` subclass
+* integrate it into `FindCommandParser#parseArgs(...)` and `buildPredicate(...)`
+* `CombinedAndPersonPredicate` can compose any number of predicates together
 
 ### \[Proposed\] Undo/redo feature
 
@@ -355,7 +376,6 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 | `* *` | volunteer coordinator | search for volunteers available during a specific time period | create event rosters quickly |
 | `*` | new user | see the application pre-populated with sample data | understand how the application works |
 | `*` | new user | view the user guide | access documentation if I get stuck |
-| `*` | volunteer coordinator at an event with poor internet connectivity | view the user guide offline | access documentation without internet |
 | `*` | advanced user | read the data file easily | inspect or manipulate data using external tools |
 | `*` | advanced user | transfer my data file between computers | migrate my data easily |
 | `*` | user | have the data file reset automatically if it becomes corrupted | prevent the application from crashing |
@@ -367,7 +387,6 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 | `*` | volunteer coordinator | view text-based role distribution graphs | analyze volunteer data in the CLI |
 | `*` | volunteer coordinator | list volunteers sorted by least-recently-served | distribute workload more fairly |
 | `*` | volunteer coordinator | export only selected fields to CSV | generate reports without exposing sensitive personal data |
-| `*` | volunteer coordinator working in a public space | enable privacy mode | prevent accidental exposure of sensitive personal data |
 | `*` | volunteer coordinator | find volunteers even when part of the name is remembered | locate contacts without exact matches |
 | `*` | volunteer coordinator | find volunteers despite small typing mistakes | avoid slowdowns due to typos |
 | `*` | volunteer coordinator | search names case-insensitively | avoid worrying about capitalization |
@@ -383,9 +402,9 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 
 **MSS:**
 
-1. User requests to bind a specific alias to a specific target command.
-2. System validates that the given alias does not conflict with pre-existing commands.
-3. System maps the given alias to the given target command, and updates the storage file.
+1. User requests to bind a specific alias to a specific built-in target command word.
+2. System validates that the given alias does not conflict with pre-existing commands, and that the target command word is supported for aliasing.
+3. System maps the given alias to the given target command word, and updates the storage file.
 4. System informs user that the new alias has been successfully defined.
    Use case ends.
 
@@ -394,6 +413,14 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 * 2a. The given alias conflicts with an existing command.
   * 2a1. System rejects the alias binding and issues an error.
   * 2a2. Use case ends.
+
+* 2b. The target command word is not supported for aliasing.
+  * 2b1. System rejects the alias binding and issues an error.
+  * 2b2. Use case ends.
+
+**Startup behavior note (aliases):**
+- On application startup, aliases loaded from preferences are revalidated against current alias rules.
+- Invalid entries are removed, and a one-time warning is shown in the result display.
 
 **Use Case: Handle Duplicate Contact**
 
@@ -518,13 +545,12 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 
 |             Term              | Definition                                                                                                                       |
 |:-----------------------------:|:---------------------------------------------------------------------------------------------------------------------------------|
-|             Alias             | A user-defined shortcut that maps a short command to a longer target command.                                                    |
+|             Alias             | A user-defined shortcut that maps a short command word to a supported built-in command word.                                     |
 |      Availability Window      | The time period during which a volunteer is available to participate in events.                                                  |
 |        Bulk Operation         | An operation that applies to multiple contacts within a single command (e.g., deleting or assigning several volunteers at once). |
 | CSV (Comma-Separated Values)  | A text file format used to store tabular data, used by the system for importing or exporting volunteer records.                  |
 |       Duplicate Contact       | A contact that shares critical identifying fields (e.g., phone number or email address) with an existing contact in the system.  |
 |         Mainstream OS         | Windows, Linux, Unix, macOS.                                                                                                     |
-|         Privacy Mode          | A display mode that masks sensitive personal details such as phone numbers or email addresses.                                   |
 |              Tag              | A user-defined label used to categorize volunteers (e.g., “first-aid”, “logistics”).                                             |
 
 --------------------------------------------------------------------------------------------------------------------

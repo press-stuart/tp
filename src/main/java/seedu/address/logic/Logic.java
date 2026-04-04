@@ -1,6 +1,7 @@
 package seedu.address.logic;
 
 import java.nio.file.Path;
+import java.util.Optional;
 
 import javafx.collections.ObservableList;
 import seedu.address.commons.core.GuiSettings;
@@ -17,11 +18,12 @@ public interface Logic {
     /**
      * Executes the command and returns the result.
      * @param commandText The command as entered by the user.
+     * @param personListView The list viewed by the user.
      * @return the result of the command execution.
      * @throws CommandException If an error occurs during command execution.
      * @throws ParseException If an error occurs during parsing.
      */
-    CommandResult execute(String commandText) throws CommandException, ParseException;
+    CommandResult execute(String commandText, PersonListView personListView) throws CommandException, ParseException;
 
     /**
      * Returns the AddressBook.
@@ -30,8 +32,15 @@ public interface Logic {
      */
     ReadOnlyAddressBook getAddressBook();
 
-    /** Returns an unmodifiable view of the filtered list of persons */
-    ObservableList<Person> getFilteredPersonList();
+    /**
+     * Returns an unmodifiable view of the filtered kept list of persons.
+     */
+    ObservableList<Person> getFilteredKeptPersonList();
+
+    /**
+     * Returns an unmodifiable view of the filtered deleted list of persons.
+     */
+    ObservableList<Person> getFilteredDeletedPersonList();
 
     /**
      * Returns the user prefs' address book file path.
@@ -47,4 +56,9 @@ public interface Logic {
      * Set the user prefs' GUI settings.
      */
     void setGuiSettings(GuiSettings guiSettings);
+
+    /**
+     * Returns and clears any startup message that should be shown once in the UI.
+     */
+    Optional<String> consumeStartupMessage();
 }

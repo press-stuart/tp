@@ -4,6 +4,7 @@ import static java.util.Objects.requireNonNull;
 import static seedu.address.model.Model.PREDICATE_SHOW_ALL_PERSONS;
 
 import seedu.address.commons.util.ToStringBuilder;
+import seedu.address.logic.PersonListView;
 import seedu.address.model.Model;
 import seedu.address.model.person.sort.PersonSortComparator;
 import seedu.address.model.person.sort.SortAttribute;
@@ -44,9 +45,9 @@ public class ListCommand extends Command {
     }
 
     @Override
-    public CommandResult execute(Model model) {
+    public CommandResult execute(Model model, PersonListView personListView) {
         requireNonNull(model);
-        model.updateFilteredPersonList(PREDICATE_SHOW_ALL_PERSONS);
+        model.updateFilteredKeptPersonList(PREDICATE_SHOW_ALL_PERSONS);
 
         if (sortAttribute == null) {
             model.updateSortedPersonList(null);
@@ -54,8 +55,9 @@ public class ListCommand extends Command {
         }
 
         model.updateSortedPersonList(new PersonSortComparator(sortAttribute, sortOrder));
-        return new CommandResult(String.format(MESSAGE_SUCCESS_SORTED,
-                sortAttribute.getToken(), sortOrder.getToken()));
+        String feedback = String.format(MESSAGE_SUCCESS_SORTED,
+                sortAttribute.getToken(), sortOrder.getToken());
+        return new CommandResult(feedback, PersonListView.KEPT_PERSONS);
     }
 
     @Override

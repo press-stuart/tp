@@ -7,7 +7,7 @@ skinparam classBackgroundColor LOGIC_COLOR
 package Logic as LogicPackage {
 Class FindCommand
 Class FindCommandParser
-Class FindMatchTypeFactory
+Class PersonContainsFieldsPredicateFactory
 Enum "<<enumeration>>\nFindMatchType" as FindMatchType
 }
 
@@ -17,12 +17,17 @@ Class "{abstract}\nPersonContainsFieldsPredicate" as PersonContainsFieldsPredica
 Class PersonContainsKeywordsPredicate #MODEL_COLOR
 Class PersonContainsSubstringsPredicate #MODEL_COLOR
 Class PersonContainsFuzzyKeywordsPredicate #MODEL_COLOR
+Class CombinedAndPersonPredicate #MODEL_COLOR
+Class PersonAvailableDuringPredicate #MODEL_COLOR
+Class VolunteerAvailability #MODEL_COLOR
 }
 
 FindCommandParser ..> FindMatchType
-FindCommandParser ..> FindMatchTypeFactory
-FindMatchTypeFactory ..> FindMatchType
-FindMatchTypeFactory ..> PersonContainsFieldsPredicate
+FindCommandParser ..> PersonContainsFieldsPredicateFactory
+FindCommandParser ..> CombinedAndPersonPredicate
+FindCommandParser ..> PersonAvailableDuringPredicate
+PersonContainsFieldsPredicateFactory ..> FindMatchType
+PersonContainsFieldsPredicateFactory ..> PersonContainsFieldsPredicate
 FindCommandParser ..> FindCommand
 FindCommand --> PersonPredicate
 
@@ -30,4 +35,7 @@ PersonContainsFieldsPredicate ..|> PersonPredicate
 PersonContainsKeywordsPredicate --|> PersonContainsFieldsPredicate
 PersonContainsSubstringsPredicate --|> PersonContainsFieldsPredicate
 PersonContainsFuzzyKeywordsPredicate --|> PersonContainsFieldsPredicate
+CombinedAndPersonPredicate ..|> PersonPredicate
+PersonAvailableDuringPredicate ..|> PersonPredicate
+PersonAvailableDuringPredicate --> VolunteerAvailability
 @enduml

@@ -7,11 +7,13 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
-import seedu.address.commons.util.CsvImportFileResult;
-import seedu.address.commons.util.CsvImportRowError;
-import seedu.address.commons.util.CsvImportRowSuccess;
-import seedu.address.commons.util.CsvReaderUtil;
+import seedu.address.commons.util.ToStringBuilder;
+import seedu.address.logic.PersonListView;
 import seedu.address.logic.commands.exceptions.CommandException;
+import seedu.address.logic.csv.CsvImportFileResult;
+import seedu.address.logic.csv.CsvImportRowError;
+import seedu.address.logic.csv.CsvImportRowSuccess;
+import seedu.address.logic.csv.CsvReaderUtil;
 import seedu.address.model.Model;
 import seedu.address.model.person.Person;
 
@@ -42,7 +44,7 @@ public class ImportCommand extends Command {
     }
 
     @Override
-    public CommandResult execute(Model model) throws CommandException {
+    public CommandResult execute(Model model, PersonListView personListView) throws CommandException {
         requireNonNull(model);
 
         CsvImportFileResult result;
@@ -63,11 +65,10 @@ public class ImportCommand extends Command {
         for (CsvImportRowSuccess successRow : result.getValidRows()) {
             Person person = successRow.getPerson();
 
-            Person duplicatePerson = findDuplicatePerson(model, personsImportedThisRun, person);
-            if (duplicatePerson != null) {
+            if (hasDuplicatePerson(model, personsImportedThisRun, person)) {
                 duplicateRows.add(new CsvImportRowError(
                         successRow.getRowNumber(),
-                        getDuplicateReason(person, duplicatePerson)));
+                        "duplicate"));
             } else {
                 model.addPerson(person);
                 personsImportedThisRun.add(person);
@@ -75,40 +76,14 @@ public class ImportCommand extends Command {
             }
         }
 
-        return new CommandResult(buildSummaryMessage(importedCount, duplicateRows, invalidRows));
+        return new CommandResult(
+                buildSummaryMessage(importedCount, duplicateRows, invalidRows),
+                PersonListView.KEPT_PERSONS);
     }
 
-    private Person findDuplicatePerson(Model model, List<Person> personsImportedThisRun, Person person) {
-        if (model.hasPerson(person)) {
-            for (Person existingPerson : model.getAddressBook().getPersonList()) {
-                if (existingPerson.isSamePerson(person)) {
-                    return existingPerson;
-                }
-            }
-        }
-
-        for (Person importedPerson : personsImportedThisRun) {
-            if (importedPerson.isSamePerson(person)) {
-                return importedPerson;
-            }
-        }
-
-        return null;
-    }
-
-    private String getDuplicateReason(Person importedPerson, Person existingPerson) {
-        boolean samePhone = existingPerson.getPhone().equals(importedPerson.getPhone());
-        boolean sameEmail = existingPerson.getEmail().equals(importedPerson.getEmail());
-
-        if (samePhone && sameEmail) {
-            return "same phone and email";
-        } else if (samePhone) {
-            return "same phone";
-        } else if (sameEmail) {
-            return "same email";
-        } else {
-            return "duplicate";
-        }
+    private boolean hasDuplicatePerson(Model model, List<Person> personsImportedThisRun, Person person) {
+        return model.hasPerson(person)
+                || personsImportedThisRun.stream().anyMatch(importedPerson -> importedPerson.isSamePerson(person));
     }
 
     private String buildSummaryMessage(int importedCount,
@@ -118,18 +93,18 @@ public class ImportCommand extends Command {
         sb.append(String.format("Imported %1$d volunteers from %2$s.", importedCount, filePath));
 
         if (!duplicateRows.isEmpty() || !invalidRows.isEmpty()) {
-            sb.append(System.lineSeparator())
+            sb.append("\n")
                     .append("Duplicate rows: ").append(duplicateRows.size())
                     .append(", Invalid rows: ").append(invalidRows.size());
 
             if (!duplicateRows.isEmpty()) {
-                sb.append(System.lineSeparator())
+                sb.append("\n")
                         .append("Duplicate row details: ")
                         .append(formatRowErrors(duplicateRows));
             }
 
             if (!invalidRows.isEmpty()) {
-                sb.append(System.lineSeparator())
+                sb.append("\n")
                         .append("Invalid row details: ")
                         .append(formatRowErrors(invalidRows));
             }
@@ -150,5 +125,12 @@ public class ImportCommand extends Command {
         return other == this
                 || (other instanceof ImportCommand
                 && filePath.equals(((ImportCommand) other).filePath));
+    }
+
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this)
+                .add("filePath", filePath)
+                .toString();
     }
 }

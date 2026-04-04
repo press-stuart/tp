@@ -19,7 +19,7 @@ RosterBolt is a **desktop app for managing team contacts, optimized for use via 
 
 1. Copy the file to the folder you want to use as the _home folder_ for your RosterBolt.
 
-1. Open a command terminal, `cd` into the folder you put the jar file in, and use the `java -jar addressbook.jar` command to run the application.<br>
+1. Open a command terminal, `cd` into the folder you put the jar file in, and use the `java -jar RosterBolt.jar` command to run the application.<br>
    A GUI similar to the below should appear in a few seconds. Note how the app contains some sample data.<br>
    ![Ui](images/Ui.png)
 
@@ -58,7 +58,7 @@ RosterBolt is a **desktop app for managing team contacts, optimized for use via 
 * Parameters can be in any order.<br>
   e.g. if the command specifies `n/NAME p/PHONE_NUMBER`, `p/PHONE_NUMBER n/NAME` is also acceptable.
 
-* Extraneous parameters for commands that do not take in parameters (such as `help`, `exit` and `clear`) will be ignored.<br>
+* Extraneous parameters for commands that do not take in parameters (such as `help`, `exit`, `clear`, `bin`, `aliases` and `editprev`) will be ignored.<br>
   e.g. if the command specifies `help 123`, it will be interpreted as `help`.
 
 * If you are using a PDF version of this document, be careful when copying and pasting commands that span multiple lines as space characters surrounding line-breaks may be omitted when copied over to the application.
@@ -84,7 +84,7 @@ A person can have any number of tags, availabilities, and records (including 0).
 </div>
 
 * A person is considered a duplicate if the phone number matches exactly, or the email matches case-insensitively.
-* `AVAILABILITIES` must be in the format `DAY,HH:mm,HH:mm` (day, start time, end time) where `DAY` is a full uppercase day name (e.g., `MONDAY`) and start time is earlier than end time.
+* `AVAILABILITIES` must be in the format `DAY,HH:mm,HH:mm` (day, start time, end time) where `DAY` is a full day name (case-insensitive, e.g., `MONDAY`, `monday`, or `Monday`) and start time is earlier than end time.
 * `RECORDS` must be in the format `yyyy-MM-ddTHH:mm,yyyy-MM-ddTHH:mm` (start date-time, end date-time) and start date-time must be earlier than end date-time.
 
 Examples:
@@ -109,22 +109,21 @@ Examples:
 
 ### Creating a command alias : `alias`
 
-Creates a custom alias for a built-in command or command template.
+Creates a custom alias for a supported built-in command word.
 
-Format: `alias SHORT TEMPLATE`
+Format: `alias SHORT COMMAND_WORD`
 
 * `SHORT` must be a lowercase command-word-style token.
-* The first word of `TEMPLATE` must be an existing built-in command word.
-* Any later words in `TEMPLATE` become default arguments for that command.
+* `COMMAND_WORD` must be exactly one supported built-in command word: `add`, `bin`, `clear`, `delete`, `edit`, `exit`, `export`, `find`, `help`, `import`, `list`, or `stats`.
 * Alias expansion replaces only the leading command word and appends the rest of the user input unchanged.
-* Any built-in command can be aliased, including meta commands such as `alias`, `unalias`, `aliases`, and `clear`.
+* `alias`, `aliases`, `unalias`, and `editprev` cannot be used as alias targets.
 * Aliases are treated as workflow preferences rather than roster data, so they are persisted in the user preferences file (default: `preferences.json`).
+* If invalid aliases are detected in `preferences.json` at startup, they are removed and shown once in the result display.
 
 Examples:
 * `alias ls list`
 * `alias rm delete`
 * `alias wipe clear`
-* `alias ss find m/ss meie`
 
 ### Listing command aliases : `aliases`
 
@@ -151,8 +150,8 @@ Format: `edit INDEX [n/NAME] [p/PHONE] [e/EMAIL] [a/ADDRESS] [r/ROLE] [nt/NOTES]
 * At least one of the optional fields must be provided.
 * Existing values will be updated to the input values.
 * When editing tags, availabilities, or records, existing values of that field will be replaced (i.e. adding is not cumulative).
-* You can remove all the person’s tags, availabilities, or records by typing `t/`, `va/`, or `vr/` without specifying values after the prefix.
-* `AVAILABILITY` format: `DAY,HH:mm,HH:mm` (e.g., `MONDAY,14:00,17:00`).
+* You can remove all the person’s tags, availabilities, records, role, or notes by typing `t/`, `va/`, `vr/`, `r/`, or `nt/` without specifying values after the prefix.
+* `AVAILABILITY` format: `DAY,HH:mm,HH:mm` where `DAY` is case-insensitive (e.g., `MONDAY,14:00,17:00`).
 * `RECORD` format: `yyyy-MM-ddTHH:mm,yyyy-MM-ddTHH:mm` (e.g., `2026-03-20T14:00,2026-03-20T17:00`).
 
 Examples:
@@ -161,9 +160,9 @@ Examples:
 
 ### Locating persons by keyword: `find`
 
-Finds persons whose fields contain any of the given keywords.
+Finds persons whose fields contain any of the given keywords, optionally filtered by volunteer availability.
 
-Format: `find [m/MATCH_TYPE] KEYWORD [MORE_KEYWORDS]`
+Format: `find [m/MATCH_TYPE] [va/DAY,HH:mm,HH:mm] [KEYWORD [MORE_KEYWORDS]]`
 
 * The search is case-insensitive. e.g `hans` will match `Hans`
 * The order of the keywords does not matter. e.g. `Hans Bo` will match `Bo Hans`
@@ -171,6 +170,10 @@ Format: `find [m/MATCH_TYPE] KEYWORD [MORE_KEYWORDS]`
 * `m/kw` matches full words only. e.g. `Han` will not match `Hans`
 * `m/ss` matches substrings. e.g. `Han` will match `Hans`
 * `m/fz` allows small spelling mistakes. Words that are up to 2 simple edits away (in terms of adding, removing, or changing a letter) can still match. e.g. `michigan` will match `michegan`
+* `va/DAY,HH:mm,HH:mm` filters for volunteers whose availability covers the specified time period, i.e. the volunteer's availability is on the same day, starts at or before the specified start time, and ends at or after the specified end time. `DAY` is a full day name (case-insensitive, e.g., `MONDAY`), and start time must be before end time.
+* At least one of keywords or `va/` must be provided.
+* When both keywords and `va/` are provided, only persons matching **both** the keyword search **and** the availability filter are returned.
+* If `m/MATCH_TYPE` is specified, at least one keyword must also be provided.
 * Persons matching at least one keyword will be returned (i.e. `OR` search).
   e.g. `Hans Bo` will return `Hans Gruber`, `Bo Yang`
 * `MATCH_TYPE` is optional. When omitted, keyword matching is used.
@@ -183,6 +186,22 @@ Examples:
 * `find m/kw John` also returns `john` and `John Doe`
 * `find m/ss ali` returns `Alice Pauline` and `Ali Tan`
 * `find m/fz michigan` returns `Elle Meyer` (address: `michegan ave`)
+* `find va/MONDAY,14:00,17:00` returns all persons available on Monday from 14:00 to 17:00
+* `find va/MONDAY,14:00,17:00 alice` returns persons matching `alice` who are also available on Monday from 14:00 to 17:00
+
+### Viewing volunteer statistics : `stats`
+
+Displays volunteer statistics as text-based charts in the result display.
+
+Format: `stats CATEGORY`
+
+* Currently supported `CATEGORY`: `role`, `record`.
+* `role` shows the percentage distribution of volunteer roles (empty roles are shown as `Unassigned`).
+* `record` shows volunteers ranked by the number of volunteer records.
+
+Examples:
+* `stats role`
+* `stats record`
 
 ### Deleting a person : `delete`
 
@@ -193,6 +212,7 @@ Format: `delete INDEX [MORE_INDICES]`
 * Deletes the person at the specified indices.
 * Indices refer to index numbers shown in the displayed person list.
 * Indices **must be positive integers** 1, 2, 3, …​
+* Deleted persons will be added to the recycle bin.
 
 Examples:
 * `list` followed by `delete 2 3` deletes the 2nd and 3rd persons in RosterBolt.
@@ -221,6 +241,8 @@ Examples:
 Clears all entries from RosterBolt.
 
 Format: `clear`
+
+* Deleted persons will be added to the recycle bin.
 
 ### Exiting the program : `exit`
 
@@ -278,8 +300,8 @@ _Details coming soon ..._
 
 Action | Format, Examples
 --------|------------------
-**Add** | `add n/NAME p/PHONE_NUMBER e/EMAIL a/ADDRESS [t/TAG]…​ [r/ROLE] [nt/NOTES] [va/AVAILABILITY]…​ [vr/RECORD]…​` <br> e.g., `add n/James Ho p/22224444 e/jamesho@example.com a/123, Clementi Rd, 1234665 t/friend t/colleague r/Usher nt/Available weekends`
-**Alias** | `alias SHORT TEMPLATE`<br> e.g., `alias ls list`
+**Add** | `add n/NAME p/PHONE_NUMBER e/EMAIL a/ADDRESS [t/TAG]…​ [r/ROLE] [nt/NOTES] [va/AVAILABILITIES]…​ [vr/RECORDS]…​` <br> e.g., `add n/James Ho p/22224444 e/jamesho@example.com a/123, Clementi Rd, 1234665 t/friend t/colleague r/Usher nt/Available weekends va/SUNDAY,14:00,17:00 vr/2026-03-20T14:00,2026-03-20T17:00`
+**Alias** | `alias SHORT COMMAND_WORD`<br> e.g., `alias ls list`
 **Aliases** | `aliases`
 **Unalias** | `unalias SHORT`<br> e.g., `unalias ls`
 **Clear** | `clear`
@@ -287,8 +309,9 @@ Action | Format, Examples
 **Edit** | `edit INDEX [n/NAME] [p/PHONE_NUMBER] [e/EMAIL] [a/ADDRESS] [r/ROLE] [nt/NOTES] [t/TAG]…​ [va/AVAILABILITY]…​ [vr/RECORD]…​`<br> e.g., `edit 2 n/James Lee e/jameslee@example.com va/MONDAY,14:00,17:00`
 **Edit Previous** | `editprev`
 **Export** | `export FILE_PATH`<br> e.g., `export data/volunteers.csv`
-**Find** | `find [m/MATCH_TYPE] KEYWORD [MORE_KEYWORDS]`<br> e.g., `find m/kw James Jake`, `find m/ss ali`, `find m/fz michigan`
+**Find** | `find [m/MATCH_TYPE] [va/DAY,HH:mm,HH:mm] [KEYWORD [MORE_KEYWORDS]]`<br> e.g., `find m/kw James Jake`, `find m/ss ali`, `find m/fz michigan`, `find va/MONDAY,14:00,17:00`, `find va/MONDAY,14:00,17:00 alice`
 **Import** | `import FILE_PATH`<br> e.g., `import data/volunteers.csv`
 **List** | `list [ATTRIBUTE [asc|desc]]`<br> e.g., `list name desc`
 **Exit** | `exit`
 **Help** | `help`
+**Stats** | `stats CATEGORY`<br> e.g., `stats role`, `stats record`

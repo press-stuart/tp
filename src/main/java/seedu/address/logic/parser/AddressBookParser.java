@@ -9,16 +9,19 @@ import seedu.address.commons.core.LogsCenter;
 import seedu.address.logic.commands.AddCommand;
 import seedu.address.logic.commands.AliasCommand;
 import seedu.address.logic.commands.AliasesCommand;
+import seedu.address.logic.commands.BinCommand;
 import seedu.address.logic.commands.ClearCommand;
 import seedu.address.logic.commands.Command;
 import seedu.address.logic.commands.DeleteCommand;
 import seedu.address.logic.commands.EditCommand;
+import seedu.address.logic.commands.EditPreviousCommand;
 import seedu.address.logic.commands.ExitCommand;
 import seedu.address.logic.commands.ExportCommand;
 import seedu.address.logic.commands.FindCommand;
 import seedu.address.logic.commands.HelpCommand;
 import seedu.address.logic.commands.ImportCommand;
 import seedu.address.logic.commands.ListCommand;
+import seedu.address.logic.commands.StatsCommand;
 import seedu.address.logic.commands.UnaliasCommand;
 import seedu.address.logic.parser.exceptions.ParseException;
 
@@ -49,7 +52,6 @@ public class AddressBookParser {
         logger.fine("Command word: " + commandWord + "; Arguments: " + arguments);
 
         switch (commandWord) {
-
         case AddCommand.COMMAND_WORD:
             return new AddCommandParser().parse(arguments);
 
@@ -74,6 +76,9 @@ public class AddressBookParser {
         case ListCommand.COMMAND_WORD:
             return new ListCommandParser().parse(arguments);
 
+        case BinCommand.COMMAND_WORD:
+            return new BinCommand();
+
         case ExitCommand.COMMAND_WORD:
             return new ExitCommand();
 
@@ -83,10 +88,17 @@ public class AddressBookParser {
         case HelpCommand.COMMAND_WORD:
             return new HelpCommand();
 
+        case StatsCommand.COMMAND_WORD:
+            return new StatsCommandParser().parse(arguments);
+
         case UnaliasCommand.COMMAND_WORD:
             return new UnaliasCommandParser().parse(arguments);
+
         case ExportCommand.COMMAND_WORD:
             return new ExportCommandParser().parse(arguments);
+
+        case EditPreviousCommand.COMMAND_WORD:
+            return new EditPreviousCommand();
 
         default:
             logger.finer("This user input caused a ParseException: " + userInput);

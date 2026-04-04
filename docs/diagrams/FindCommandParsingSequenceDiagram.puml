@@ -7,9 +7,8 @@ participant ":LogicManager" as LogicManager LOGIC_COLOR
 participant ":AddressBookParser" as AddressBookParser LOGIC_COLOR
 participant ":FindCommandParser" as FindCommandParser LOGIC_COLOR
 participant "<<class>>\nFindMatchType" as FindMatchTypeClass LOGIC_COLOR
-participant "<<class>>\nFindMatchTypeFactory" as FindMatchTypeFactory LOGIC_COLOR
+participant "<<class>>\nVolunteerAvailability" as VolunteerAvailability MODEL_COLOR
 participant ":ParsedFindArgs" as ParsedFindArgs LOGIC_COLOR
-participant ":PersonContainsFieldsPredicate" as PersonContainsFieldsPredicate LOGIC_COLOR
 participant "f:FindCommand" as FindCommand LOGIC_COLOR
 end box
 
@@ -23,36 +22,36 @@ create FindCommandParser
 AddressBookParser -> FindCommandParser : parse(arguments)
 activate FindCommandParser
 
-FindCommandParser -> FindCommandParser : parseFindArgs(...)
+FindCommandParser -> FindCommandParser : parseArgs(...)
 activate FindCommandParser
-alt m/ prefix provided
+opt m/ prefix provided
     FindCommandParser -> FindMatchTypeClass : fromToken()
     activate FindMatchTypeClass
     FindMatchTypeClass --> FindCommandParser : matchType
     deactivate FindMatchTypeClass
-    create ParsedFindArgs
-    FindCommandParser -> ParsedFindArgs : ParsedFindArgs(...)
-    activate ParsedFindArgs
-    ParsedFindArgs --> FindCommandParser :
-    deactivate ParsedFindArgs
-else m/ prefix not provided
-    create ParsedFindArgs
-    FindCommandParser -> ParsedFindArgs : ParsedFindArgs(...)
-    activate ParsedFindArgs
-    ParsedFindArgs --> FindCommandParser :
-    deactivate ParsedFindArgs
 end
+opt va/ prefix provided
+    FindCommandParser -> VolunteerAvailability : fromString()
+    activate VolunteerAvailability
+    VolunteerAvailability --> FindCommandParser : availability
+    deactivate VolunteerAvailability
+end
+create ParsedFindArgs
+FindCommandParser -> ParsedFindArgs : ParsedFindArgs(matchType, availability, keywords)
+activate ParsedFindArgs
+ParsedFindArgs --> FindCommandParser :
+deactivate ParsedFindArgs
 deactivate FindCommandParser
 
-FindCommandParser -> FindMatchTypeFactory : createPredicate(...)
-activate FindMatchTypeFactory
-create PersonContainsFieldsPredicate
-FindMatchTypeFactory -> PersonContainsFieldsPredicate : create concrete subclass
-activate PersonContainsFieldsPredicate
-PersonContainsFieldsPredicate --> FindMatchTypeFactory : predicate
-deactivate PersonContainsFieldsPredicate
-FindMatchTypeFactory --> FindCommandParser : predicate
-deactivate FindMatchTypeFactory
+FindCommandParser -> FindCommandParser : buildPredicate(parsed)
+activate FindCommandParser
+note right
+  keywords only → text predicate via
+  PersonContainsFieldsPredicateFactory
+  va/ only → PersonAvailableDuringPredicate
+  both → CombinedAndPersonPredicate
+end note
+deactivate FindCommandParser
 
 create FindCommand
 FindCommandParser -> FindCommand : FindCommand(predicate)

@@ -2,6 +2,7 @@ package seedu.address.ui;
 
 import java.util.logging.Logger;
 
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.MenuItem;
@@ -13,9 +14,11 @@ import javafx.stage.Stage;
 import seedu.address.commons.core.GuiSettings;
 import seedu.address.commons.core.LogsCenter;
 import seedu.address.logic.Logic;
+import seedu.address.logic.PersonListView;
 import seedu.address.logic.commands.CommandResult;
 import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.logic.parser.exceptions.ParseException;
+import seedu.address.model.person.Person;
 
 /**
  * The Main Window. Provides the basic application layout containing
@@ -29,6 +32,7 @@ public class MainWindow extends UiPart<Stage> {
 
     private Stage primaryStage;
     private Logic logic;
+    private PersonListView personListView;
 
     // Independent Ui parts residing in this Ui container
     private PersonListPanel personListPanel;
@@ -59,6 +63,7 @@ public class MainWindow extends UiPart<Stage> {
         // Set dependencies
         this.primaryStage = primaryStage;
         this.logic = logic;
+        personListView = PersonListView.KEPT_PERSONS;
 
         // Configure the UI
         setWindowDefaultSize(logic.getGuiSettings());
@@ -110,11 +115,12 @@ public class MainWindow extends UiPart<Stage> {
      * Fills up all the placeholders of this window.
      */
     void fillInnerParts() {
-        personListPanel = new PersonListPanel(logic.getFilteredPersonList());
+        personListPanel = new PersonListPanel(logic.getFilteredKeptPersonList());
         personListPanelPlaceholder.getChildren().add(personListPanel.getRoot());
 
         resultDisplay = new ResultDisplay();
         resultDisplayPlaceholder.getChildren().add(resultDisplay.getRoot());
+        logic.consumeStartupMessage().ifPresent(resultDisplay::setFeedbackToUser);
 
         StatusBarFooter statusBarFooter = new StatusBarFooter(logic.getAddressBookFilePath());
         statusbarPlaceholder.getChildren().add(statusBarFooter.getRoot());
@@ -163,26 +169,25 @@ public class MainWindow extends UiPart<Stage> {
         primaryStage.hide();
     }
 
-    public PersonListPanel getPersonListPanel() {
-        return personListPanel;
-    }
-
     /**
      * Executes the command and returns the result.
      *
-     * @see seedu.address.logic.Logic#execute(String)
+     * @see seedu.address.logic.Logic#execute(String, PersonListView)
      */
     private CommandResult executeCommand(String commandText) throws CommandException, ParseException {
         try {
-            CommandResult commandResult = logic.execute(commandText);
+            CommandResult commandResult = logic.execute(commandText, personListView);
             logger.info("Result: " + commandResult.getFeedbackToUser());
             resultDisplay.setFeedbackToUser(commandResult.getFeedbackToUser());
 
-            if (commandResult.isShowHelp()) {
+            personListView = commandResult.getPersonListView();
+            updatePersonListPanel();
+
+            if (commandResult.shouldShowHelp()) {
                 handleHelp();
             }
 
-            if (commandResult.isExit()) {
+            if (commandResult.shouldExit()) {
                 handleExit();
             }
 
@@ -192,5 +197,18 @@ public class MainWindow extends UiPart<Stage> {
             resultDisplay.setFeedbackToUser(e.getMessage());
             throw e;
         }
+    }
+
+    private void updatePersonListPanel() {
+        // Indented case blocks in lambda-style switch statements are allowed
+        // CHECKSTYLE.OFF: Indentation
+        ObservableList<Person> personList = switch (personListView) {
+            case KEPT_PERSONS -> logic.getFilteredKeptPersonList();
+            case DELETED_PERSONS -> logic.getFilteredDeletedPersonList();
+            default -> throw new IllegalStateException("Unexpected value of personListView: " + personListView);
+        };
+        // CHECKSTYLE.ON: Indentation
+
+        personListPanel.setPersonList(personList);
     }
 }
