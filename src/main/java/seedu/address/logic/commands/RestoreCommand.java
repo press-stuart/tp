@@ -2,7 +2,6 @@ package seedu.address.logic.commands;
 
 import static java.util.Objects.requireNonNull;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import seedu.address.commons.core.index.Index;
@@ -51,24 +50,20 @@ public class RestoreCommand extends Command {
     public CommandResult execute(Model model, PersonListView personListView) throws CommandException {
         requireNonNull(model);
         requireViewingDeletedPersons(personListView);
+
         List<Person> lastShownList = model.getFilteredDeletedPersonList();
-        requireIndicesInRange(model);
-        List<Person> personsToRestore = new ArrayList<>();
-
-        for (Index index : targetIndices) {
-            Person person = lastShownList.get(index.getZeroBased());
-            personsToRestore.add(person);
-        }
-
+        requireIndicesInRange(targetIndices, lastShownList);
+        List<Person> personsToRestore = collectItemsByIndices(targetIndices, lastShownList);
         validatePersonsToRestore(model, personsToRestore);
-
-        for (Person person : personsToRestore) {
-            model.restorePerson(person);
-        }
+        restorePersons(model, personsToRestore);
 
         return new CommandResult(buildSuccessMessage(personsToRestore), PersonListView.DELETED_PERSONS);
     }
 
+    /**
+     * Throws a CommandException if any person to restore has the same identity as a person in the kept list,
+     * or if any two persons to restore have the same identity.
+     */
     private void validatePersonsToRestore(Model model, List<Person> personsToRestore) throws CommandException {
         for (int i = 0; i < personsToRestore.size(); i++) {
             Person personToRestore = personsToRestore.get(i);
@@ -85,21 +80,9 @@ public class RestoreCommand extends Command {
         }
     }
 
-    private boolean isStrictlyIncreasing(List<Index> indices) {
-        for (int i = 0; i + 1 < indices.size(); i++) {
-            if (indices.get(i).compareTo(indices.get(i + 1)) >= 0) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    private void requireIndicesInRange(Model model) throws CommandException {
-        List<Person> lastShownList = model.getFilteredDeletedPersonList();
-        for (Index targetIndex : targetIndices) {
-            if (targetIndex.getZeroBased() >= lastShownList.size()) {
-                throw new CommandException(Messages.MESSAGE_INVALID_PERSON_DISPLAYED_INDEX);
-            }
+    private void restorePersons(Model model, List<Person> persons) {
+        for (Person person : persons) {
+            model.restorePerson(person);
         }
     }
 

@@ -2,7 +2,6 @@ package seedu.address.logic.commands;
 
 import static java.util.Objects.requireNonNull;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import seedu.address.commons.core.index.Index;
@@ -46,37 +45,18 @@ public class DeleteCommand extends Command {
     public CommandResult execute(Model model, PersonListView personListView) throws CommandException {
         requireNonNull(model);
         requireViewingKeptPersons(personListView);
+
         List<Person> lastShownList = model.getFilteredKeptPersonList();
-        requireIndicesInRange(model);
-        List<Person> personsToDelete = new ArrayList<>();
-
-        for (Index index : targetIndices) {
-            Person person = lastShownList.get(index.getZeroBased());
-            personsToDelete.add(person);
-        }
-
-        for (Person person : personsToDelete) {
-            model.deletePerson(person);
-        }
+        requireIndicesInRange(targetIndices, lastShownList);
+        List<Person> personsToDelete = collectItemsByIndices(targetIndices, lastShownList);
+        deletePersons(model, personsToDelete);
 
         return new CommandResult(buildSuccessMessage(personsToDelete), PersonListView.KEPT_PERSONS);
     }
 
-    private boolean isStrictlyIncreasing(List<Index> indices) {
-        for (int i = 0; i + 1 < indices.size(); i++) {
-            if (indices.get(i).compareTo(indices.get(i + 1)) >= 0) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    private void requireIndicesInRange(Model model) throws CommandException {
-        List<Person> lastShownList = model.getFilteredKeptPersonList();
-        for (Index targetIndex : targetIndices) {
-            if (targetIndex.getZeroBased() >= lastShownList.size()) {
-                throw new CommandException(Messages.MESSAGE_INVALID_PERSON_DISPLAYED_INDEX);
-            }
+    private void deletePersons(Model model, List<Person> persons) {
+        for (Person person : persons) {
+            model.deletePerson(person);
         }
     }
 
