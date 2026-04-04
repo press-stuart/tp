@@ -7,14 +7,18 @@ skinparam classBackgroundColor LOGIC_COLOR
 package Logic {
 
   package commands {
-    abstract class Command LOGIC_COLOR
+    class "{abstract}\nCommand" as Command LOGIC_COLOR
     class ExportCommand LOGIC_COLOR
     class ImportCommand LOGIC_COLOR
   }
 
   package parser {
     class AddressBookParser LOGIC_COLOR
-    class Parser <<interface>> LOGIC_COLOR
+
+    interface "Parser<T>" as Parser LOGIC_COLOR
+    interface "Parser<ExportCommand>" as ExportCommandParserType LOGIC_COLOR
+    interface "Parser<ImportCommand>" as ImportCommandParserType LOGIC_COLOR
+
     class ExportCommandParser LOGIC_COLOR
     class ImportCommandParser LOGIC_COLOR
     class ParserUtil LOGIC_COLOR
@@ -36,18 +40,19 @@ package Model {
 AddressBookParser ..> ExportCommandParser
 AddressBookParser ..> ImportCommandParser
 
-ExportCommandParser ..|> Parser
-ImportCommandParser ..|> Parser
+ExportCommandParser --|> ExportCommandParserType
+ImportCommandParser --|> ImportCommandParserType
 
-ExportCommandParser ..> ExportCommand
-ImportCommandParser ..> ImportCommand
+ExportCommandParserType ..> Parser
+ImportCommandParserType ..> Parser
 
-ExportCommand --> Command
-ImportCommand --> Command
+ExportCommand ..|> Command
+ImportCommand ..|> Command
 
 ExportCommand ..> CsvWriterUtil
 
 ImportCommand ..> CsvReaderUtil
+ImportCommand ..> CsvImportRowSuccess
 ImportCommand ..> CsvImportRowError
 
 CsvWriterUtil ..> Person
@@ -55,6 +60,7 @@ CsvWriterUtil ..> Person
 CsvReaderUtil ..> ParserUtil
 CsvReaderUtil ..> Person
 CsvReaderUtil ..> CsvImportFileResult
+
 CsvImportFileResult *-- "0..*" CsvImportRowSuccess
 CsvImportFileResult *-- "0..*" CsvImportRowError
 CsvImportRowSuccess --> Person

@@ -51,10 +51,13 @@ loop for each non-blank CSV row
 end
 
 create CsvImportFileResult
-CsvReaderUtil --> CsvImportFileResult : CsvImportFileResult
-deactivate CsvReaderUtil
+CsvReaderUtil -> CsvImportFileResult : CsvImportFileResult(validRows, invalidRows)
+activate CsvImportFileResult
+CsvImportFileResult --> CsvReaderUtil : result
+deactivate CsvImportFileResult
 
-CsvImportFileResult --> ImportCommand : result
+CsvReaderUtil --> ImportCommand : result
+deactivate CsvReaderUtil
 
 ImportCommand -> CsvImportFileResult : getInvalidRows()
 activate CsvImportFileResult
