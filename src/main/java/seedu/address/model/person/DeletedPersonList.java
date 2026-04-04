@@ -50,6 +50,7 @@ public class DeletedPersonList extends PersonList {
 
         if (!target.equals(editedPerson) && contains(editedPerson)) {
             remove(target);
+            return;
         }
 
         internalList.set(index, editedPerson);

@@ -135,11 +135,16 @@ public class DeletedPersonListTest {
 
     @Test
     public void setPerson_editedPersonHasNonUniqueIdentity_deletesTarget() {
-        deletedPersonList.add(ALICE);
-        deletedPersonList.add(BOB);
-        deletedPersonList.setPerson(ALICE, BOB);
         DeletedPersonList expectedDeletedPersonList = new DeletedPersonList();
-        expectedDeletedPersonList.add(BOB);
+
+        deletedPersonList.setPersons(List.of(ALICE, BOB));
+        deletedPersonList.setPerson(ALICE, BOB);
+        expectedDeletedPersonList.setPersons(List.of(BOB));
+        assertEquals(expectedDeletedPersonList, deletedPersonList);
+
+        deletedPersonList.setPersons(List.of(ALICE, BOB));
+        deletedPersonList.setPerson(BOB, ALICE);
+        expectedDeletedPersonList.setPersons(List.of(ALICE));
         assertEquals(expectedDeletedPersonList, deletedPersonList);
     }
 
