@@ -140,6 +140,15 @@ Format: `unalias SHORT`
 Examples:
 * `unalias ls`
 
+### Showing recycle bin of recently deleted persons : `bin`
+
+Shows the recycle bin, which contains all recently deleted persons in RosterBolt.
+
+Format: `bin`
+
+* Persons deleted by the `clear` and `delete` commands will be added to the recycle bin.
+* The recycle bin is cleared when the application is closed.
+
 ### Editing a person : `edit`
 
 Edits an existing person in RosterBolt.
@@ -324,6 +333,7 @@ Action | Format, Examples
 **Alias** | `alias SHORT COMMAND_WORD`<br> e.g., `alias ls list`
 **Aliases** | `aliases`
 **Unalias** | `unalias SHORT`<br> e.g., `unalias ls`
+**Bin** | `bin`
 **Clear** | `clear`
 **Delete** | `delete INDEX [MORE_INDICES]`<br> e.g., `delete 2 3`
 **Edit** | `edit INDEX [n/NAME] [p/PHONE_NUMBER] [e/EMAIL] [a/ADDRESS] [r/ROLE] [nt/NOTES] [t/TAG]…​ [va/AVAILABILITY]…​ [vr/RECORD]…​`<br> e.g., `edit 2 n/James Lee e/jameslee@example.com va/MONDAY,14:00,17:00`
