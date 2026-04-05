@@ -64,6 +64,7 @@ public class PersonSortComparatorTest {
                 .withEmail("a@example.com")
                 .withRole("Developer")
                 .withTags("beta", "alpha")
+                .withRecords("2026-03-20T09:00,2026-03-20T12:00")
                 .build();
         Person second = new PersonBuilder()
                 .withName("BOB")
@@ -71,6 +72,7 @@ public class PersonSortComparatorTest {
                 .withEmail("b@example.com")
                 .withRole("Tester")
                 .withTags("beta", "charlie")
+                .withRecords("2026-04-01T09:00,2026-04-01T12:00")
                 .build();
 
         assertTrue(new PersonSortComparator(SortAttribute.NAME, SortOrder.ASC).compare(first, second) < 0);
@@ -78,6 +80,7 @@ public class PersonSortComparatorTest {
         assertTrue(new PersonSortComparator(SortAttribute.EMAIL, SortOrder.ASC).compare(first, second) < 0);
         assertTrue(new PersonSortComparator(SortAttribute.ROLE, SortOrder.ASC).compare(first, second) < 0);
         assertTrue(new PersonSortComparator(SortAttribute.TAG, SortOrder.ASC).compare(first, second) < 0);
+        assertTrue(new PersonSortComparator(SortAttribute.VR, SortOrder.ASC).compare(first, second) < 0);
     }
 
     @Test
@@ -96,5 +99,16 @@ public class PersonSortComparatorTest {
 
         PersonSortComparator comparator = new PersonSortComparator(SortAttribute.NAME, SortOrder.DESC);
         assertTrue(comparator.compare(first, second) > 0);
+    }
+
+    @Test
+    public void compare_volunteerRecordsEmptyVsNonEmpty_ordersEmptyFirst() {
+        Person noRecords = new PersonBuilder().withName("Alice").build();
+        Person withRecords = new PersonBuilder().withName("Bob")
+                .withRecords("2026-03-20T09:00,2026-03-20T12:00")
+                .build();
+
+        PersonSortComparator comparator = new PersonSortComparator(SortAttribute.VR, SortOrder.ASC);
+        assertTrue(comparator.compare(noRecords, withRecords) < 0);
     }
 }
