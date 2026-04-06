@@ -44,14 +44,16 @@ public class AddCommandIntegrationTest {
         expectedModel.addPerson(validPerson);
 
         assertCommandSuccess(new AddCommand(validPerson), model,
+                PersonListView.KEPT_PERSONS,
                 String.format(AddCommand.MESSAGE_SUCCESS, Messages.format(validPerson)),
+                PersonListView.KEPT_PERSONS,
                 expectedModel);
     }
 
     @Test
     public void execute_duplicatePerson_throwsCommandException() {
         Person personInList = model.getAddressBook().getKeptPersonList().get(0);
-        assertCommandFailure(new AddCommand(personInList), model,
+        assertCommandFailure(new AddCommand(personInList), model, PersonListView.KEPT_PERSONS,
                 AddCommand.MESSAGE_DUPLICATE_PERSON);
     }
 
@@ -64,7 +66,7 @@ public class AddCommandIntegrationTest {
                 .withEmail(personInList.getEmail().value.toUpperCase())
                 .build();
 
-        assertCommandFailure(new AddCommand(duplicateByEmail), model,
+        assertCommandFailure(new AddCommand(duplicateByEmail), model, PersonListView.KEPT_PERSONS,
                 AddCommand.MESSAGE_DUPLICATE_PERSON);
     }
 
@@ -80,7 +82,9 @@ public class AddCommandIntegrationTest {
         expectedModel.addPerson(sameNameDifferentContacts);
 
         assertCommandSuccess(new AddCommand(sameNameDifferentContacts), model,
+                PersonListView.KEPT_PERSONS,
                 String.format(AddCommand.MESSAGE_SUCCESS, Messages.format(sameNameDifferentContacts)),
+                PersonListView.KEPT_PERSONS,
                 expectedModel);
     }
 
@@ -92,7 +96,7 @@ public class AddCommandIntegrationTest {
                 .withEmail("sarah.teo@example.com")
                 .build();
 
-        assertCommandFailure(new AddCommand(duplicateByPhone), model,
+        assertCommandFailure(new AddCommand(duplicateByPhone), model, PersonListView.KEPT_PERSONS,
                 AddCommand.MESSAGE_DUPLICATE_PERSON);
     }
 
@@ -105,7 +109,7 @@ public class AddCommandIntegrationTest {
                 .withNotes("Experienced event runner")
                 .build();
 
-        assertCommandFailure(new AddCommand(duplicateByBoth), model,
+        assertCommandFailure(new AddCommand(duplicateByBoth), model, PersonListView.KEPT_PERSONS,
                 AddCommand.MESSAGE_DUPLICATE_PERSON);
     }
 
