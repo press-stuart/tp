@@ -50,6 +50,8 @@ public class AddCommandParser implements Parser<AddCommand> {
                         PREFIX_AVAILABILITY,
                         PREFIX_RECORD);
 
+        argMultimap.verifyNoUnknownPrefixes("n/, p/, e/, a/, t/, r/, nt/, va/, vr/");
+
         if (!arePrefixesPresent(argMultimap, PREFIX_NAME, PREFIX_ADDRESS, PREFIX_PHONE, PREFIX_EMAIL)
                 || !argMultimap.getPreamble().isEmpty()) {
             throw new ParseException(String.format(MESSAGE_INVALID_COMMAND_FORMAT, AddCommand.MESSAGE_USAGE));

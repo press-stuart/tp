@@ -89,6 +89,15 @@ A person can have any number of tags, availabilities, and records (including 0).
 * `AVAILABILITIES` must be in the format `DAY,HH:mm,HH:mm` (day, start time, end time) where `DAY` is a full day name (case-insensitive, e.g., `MONDAY`, `monday`, or `Monday`) and start time is earlier than end time.
 * `RECORDS` must be in the format `yyyy-MM-ddTHH:mm,yyyy-MM-ddTHH:mm` (start date-time, end date-time) and start date-time must be earlier than end date-time.
 
+<div markdown="span" class="alert alert-warning">:exclamation: **Caution:**
+RosterBolt will flag text that **looks like** an unknown prefix (e.g., `x/value`) if it appears in your input.
+Common abbreviations with a single character after the slash (such as `c/o` (care of), `w/o` (without)
+or `w/` (with)) are recognised and allowed. 
+
+RosterBolt, however, does **NOT** support multiple-character abbreviations after the slash (e.g., `he/she`, `m/w/f`),
+and you are advised to avoid using such abbreviations in your input. Instead, please consider rephrasing the input to avoid the need for such abbreviations (e.g., `he or she`), or using supported single-character abbreviations (e.g., `h/s` instead of `he/she`).
+</div>
+
 Examples:
 * `add n/John Doe p/98765432 e/johnd@example.com a/John street, block 123, #01-01 r/Usher nt/Weekend only va/MONDAY,14:00,17:00 vr/2026-03-20T14:00,2026-03-20T17:00`
 * `add n/Betsy Crowe t/friend e/betsycrowe@example.com a/Newgate Prison p/1234567 t/criminal r/Logistics nt/Prefers morning shifts va/SATURDAY,09:00,12:00 va/SUNDAY,13:00,16:00`

@@ -1,6 +1,7 @@
 package seedu.address.logic.parser;
 
 import static seedu.address.logic.Messages.MESSAGE_INVALID_COMMAND_FORMAT;
+import static seedu.address.logic.Messages.MESSAGE_UNKNOWN_PREFIX;
 import static seedu.address.logic.commands.CommandTestUtil.ADDRESS_DESC_AMY;
 import static seedu.address.logic.commands.CommandTestUtil.ADDRESS_DESC_BOB;
 import static seedu.address.logic.commands.CommandTestUtil.AVAILABILITY_DESC_AMY;
@@ -298,5 +299,29 @@ public class AddCommandParserTest {
         assertParseFailure(parser, PREAMBLE_NON_EMPTY + NAME_DESC_BOB + PHONE_DESC_BOB + EMAIL_DESC_BOB
                         + ADDRESS_DESC_BOB + TAG_DESC_HUSBAND + TAG_DESC_FRIEND,
                 String.format(MESSAGE_INVALID_COMMAND_FORMAT, AddCommand.MESSAGE_USAGE));
+    }
+
+    @Test
+    public void parse_unknownPrefix_failure() {
+        assertParseFailure(parser, NAME_DESC_BOB + " x/foo" + PHONE_DESC_BOB + EMAIL_DESC_BOB
+                        + ADDRESS_DESC_BOB,
+                String.format(MESSAGE_UNKNOWN_PREFIX, "x/", "n/, p/, e/, a/, t/, r/, nt/, va/, vr/"));
+    }
+
+    @Test
+    public void parse_abbreviationInValue_success() {
+        // "s/o" abbreviation in address should not be flagged as unknown prefix
+        assertParseSuccess(parser,
+                NAME_DESC_BOB + PHONE_DESC_BOB + EMAIL_DESC_BOB + " a/123 s/o Main St",
+                new AddCommand(new seedu.address.model.person.Person(
+                        new seedu.address.model.person.Name(VALID_NAME_BOB),
+                        new seedu.address.model.person.Phone(VALID_PHONE_BOB),
+                        new seedu.address.model.person.Email(VALID_EMAIL_BOB),
+                        new seedu.address.model.person.Address("123 s/o Main St"),
+                        seedu.address.model.person.Person.EMPTY_ROLE,
+                        seedu.address.model.person.Person.EMPTY_NOTES,
+                        new java.util.HashSet<>(),
+                        new java.util.HashSet<>(),
+                        new java.util.HashSet<>())));
     }
 }

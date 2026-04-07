@@ -1,6 +1,7 @@
 package seedu.address.logic.parser;
 
 import static seedu.address.logic.Messages.MESSAGE_INVALID_COMMAND_FORMAT;
+import static seedu.address.logic.Messages.MESSAGE_UNKNOWN_PREFIX;
 import static seedu.address.logic.commands.CommandTestUtil.ADDRESS_DESC_AMY;
 import static seedu.address.logic.commands.CommandTestUtil.ADDRESS_DESC_BOB;
 import static seedu.address.logic.commands.CommandTestUtil.AVAILABILITY_DESC_AMY;
@@ -296,5 +297,11 @@ public class EditCommandParserTest {
         EditCommand expectedCommand = new EditCommand(targetIndex, descriptor);
 
         assertParseSuccess(parser, userInput, expectedCommand);
+    }
+
+    @Test
+    public void parse_unknownPrefix_failure() {
+        assertParseFailure(parser, "1" + NAME_DESC_AMY + " x/foo" + PHONE_DESC_AMY,
+                String.format(MESSAGE_UNKNOWN_PREFIX, "x/", "n/, p/, e/, a/, t/, r/, nt/, va/, vr/"));
     }
 }

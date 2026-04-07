@@ -42,6 +42,8 @@ public class EditCommandParser implements Parser<EditCommand> {
                         PREFIX_NAME, PREFIX_PHONE, PREFIX_EMAIL, PREFIX_ADDRESS,
                         PREFIX_ROLE, PREFIX_NOTES, PREFIX_TAG, PREFIX_AVAILABILITY, PREFIX_RECORD);
 
+        argMultimap.verifyNoUnknownPrefixes("n/, p/, e/, a/, t/, r/, nt/, va/, vr/");
+
         Index index;
 
         try {
