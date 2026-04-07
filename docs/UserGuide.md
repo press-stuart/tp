@@ -278,6 +278,8 @@ Examples:
 
 Clears all entries from RosterBolt.
 
+You must be viewing the working list to use this command. Otherwise, an error message will be shown, and your contacts will not be cleared.
+
 Format: `clear`
 
 * Deleted persons will be added to the recycle bin.
