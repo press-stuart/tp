@@ -253,7 +253,7 @@ Format: `delete INDEX [MORE_INDICES]`
 
 * Deletes the person at the specified indices.
 * Indices refer to index numbers shown in the displayed person list.
-* Indices **must be positive integers** 1, 2, 3, ...​, up to the number of persons in the currently displayed list.
+* Indices **must be positive integers** e.g. 1, 2, 3, ...​, up to the number of persons in the currently displayed list.
 * Duplicate indices will be ignored.
 * Deleted persons will be added to the recycle bin.
 
