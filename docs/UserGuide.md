@@ -69,16 +69,27 @@ RosterBolt reduces admin overhead by **streamlining repetitive tasks** (such as 
 
 </div>
 
+<div markdown="span" class="alert alert-warning">:exclamation: **Caution:**
+For commands that validate prefixes, such as `add`, `edit`, and `find`, RosterBolt will flag text that **looks like** an unknown prefix (e.g., `x/value`) if it appears in your input.
+Common abbreviations with a single character after the slash (such as `c/o` (care of), `w/o` (without)
+or `w/` (with)) are recognised and allowed.
+
+RosterBolt, however, does **NOT** support multiple-character abbreviations after the slash (e.g., `he/she`, `m/w/f`),
+and you are advised to avoid using such abbreviations in your input. Instead, please consider rephrasing the input to avoid the need for such abbreviations (e.g., `he or she`), or using supported single-character abbreviations (e.g., `h/s` instead of `he/she`).
+</div>
+
 <div markdown="block" class="alert alert-info">
 
 **:information_source: Constraints on values in each field:**<br>
 
+Leading and trailing whitespace in each field value is trimmed before validation. A field is considered blank if nothing remains after trimming.
+
 * **Name**: Letters, numbers, and spaces only. Must start with letters or numbers, and must not be blank.
 * **Phone**: Numbers only, at least 3 digits.
-* **Email**: Must be in `local-part@domain` format. The local-part is made up of alphanumeric chunks, optionally separated by single special characters (`+_.-`). It must start and end with an alphanumeric character. The domain is made up of labels separated by periods, where each label must start and end with alphanumeric characters and may contain hyphens in between. The last domain label must be at least 2 characters long.
-* **Address**: Any characters allowed, but must not be blank or start with whitespace.
+* **Email**: Must be in `local-part@domain` format. The local-part is made up of alphanumeric chunks, optionally separated by single special characters (`+_.-`), and must start and end with an alphanumeric character. The domain is made up of one or more labels separated by periods. Each label must start and end with an alphanumeric character, may contain hyphens in between, and cannot contain underscores. The last label must be at least 2 characters long. A single-label domain such as `localhost` is allowed.
+* **Address**: Any characters allowed, but must not be blank after trimming.
 * **Tag**: Letters and numbers only. Must not be blank.
-* **Role / Notes**: No restrictions. Setting blank is equivalent to removing the role/notes.
+* **Role / Notes**: No restrictions after trimming. Setting blank is equivalent to removing the role/notes.
 * **Availability**: Must be in the format `DAY,HH:mm,HH:mm` (day, start time, end time), where `DAY` is a full day name (case-insensitive, e.g., `MONDAY`, `monday`, or `Monday`) and start time must be earlier than end time.
 * **Record**: Must be in the format `yyyy-MM-ddTHH:mm,yyyy-MM-ddTHH:mm` (start date-time, end date-time), and start date-time must be earlier than end date-time.
 
