@@ -257,6 +257,48 @@ public class FindCommandTest {
     }
 
     @Test
+    public void execute_multipleKeywordsAndAvailability_orKeywordsAndAvailability() {
+        AddressBook ab = new AddressBook();
+        // Matches keyword "Alice" and Monday availability
+        Person aliceAvailable = new PersonBuilder().withName("Alice Tan")
+                .withPhone("91111111").withEmail("alice@example.com")
+                .withAvailabilities("MONDAY,13:00,18:00").build();
+        // Matches keyword "Charlie" and Monday availability
+        Person charlieAvailable = new PersonBuilder().withName("Charlie Lim")
+                .withPhone("92222222").withEmail("charlie@example.com")
+                .withAvailabilities("MONDAY,13:00,18:00").build();
+        // Matches keyword "Alice" but NOT Monday availability
+        Person aliceUnavailable = new PersonBuilder().withName("Alice Lee")
+                .withPhone("93333333").withEmail("alicelee@example.com")
+                .withAvailabilities("TUESDAY,09:00,12:00").build();
+        // Matches Monday availability but neither keyword
+        Person bobAvailable = new PersonBuilder().withName("Bob")
+                .withPhone("94444444").withEmail("bob@example.com")
+                .withAvailabilities("MONDAY,13:00,18:00").build();
+        ab.addPerson(aliceAvailable);
+        ab.addPerson(charlieAvailable);
+        ab.addPerson(aliceUnavailable);
+        ab.addPerson(bobAvailable);
+
+        Model combinedModel = new ModelManager(ab, new UserPrefs());
+        Model expectedCombinedModel = new ModelManager(ab, new UserPrefs());
+
+        VolunteerAvailability query = VolunteerAvailability.fromString("MONDAY,14:00,17:00");
+        PersonContainsKeywordsPredicate textPredicate =
+                new PersonContainsKeywordsPredicate(Arrays.asList("Alice", "Charlie"));
+        PersonAvailableDuringPredicate availPredicate = new PersonAvailableDuringPredicate(query);
+        CombinedAndPersonPredicate combinedPredicate =
+                new CombinedAndPersonPredicate(List.of(textPredicate, availPredicate));
+        FindCommand command = new FindCommand(combinedPredicate);
+
+        expectedCombinedModel.updateFilteredKeptPersonList(combinedPredicate);
+        String expectedMessage = String.format(MESSAGE_PERSONS_LISTED_OVERVIEW, 2);
+        assertCommandSuccess(command, combinedModel, PersonListView.KEPT_PERSONS,
+                expectedMessage, PersonListView.KEPT_PERSONS, expectedCombinedModel);
+        assertEquals(List.of(aliceAvailable, charlieAvailable), combinedModel.getFilteredKeptPersonList());
+    }
+
+    @Test
     public void execute_keywordsAndAvailability_noMatchingPerson() {
         AddressBook ab = new AddressBook();
         // Matches name keyword "Alice" but wrong day

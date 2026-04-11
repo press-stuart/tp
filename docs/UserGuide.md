@@ -223,7 +223,7 @@ Format: `find [m/MATCH_TYPE] [va/DAY,HH:mm,HH:mm] [KEYWORD [MORE_KEYWORDS]]`
 * `m/fz` (fuzzy) allows small spelling mistakes. Words that are up to 2 edits away (in terms of adding, removing, or changing a letter) can still match. e.g. `michigan` matches `michegan`
 * `va/DAY,HH:mm,HH:mm` filters for volunteers whose availability covers the specified time period, i.e. the volunteer's availability is on the same day, starts at or before the specified start time, and ends at or after the specified end time. See [field constraints](#field-constraints) for the `AVAILABILITY` format.
 * At least one of keywords or `va/` must be provided.
-* When both keywords and `va/` are provided, only volunteers matching **both** the keyword search **and** the availability filter are returned.
+* When both keywords and `va/` are provided, only volunteers matching at least one keyword **and** the availability filter are returned. Note that this means the search uses mixed logic: keywords are matched among themselves using `OR`, while the availability filter is applied on top as an additional `AND` condition.
 * If `m/MATCH_TYPE` is specified, at least one keyword must also be provided.
 * If you provide multiple keywords, volunteers matching **any** of them are shown (i.e. it's an `OR` search).
   e.g. `Hans Bo` returns `Hans Gruber`, `Bo Yang`
@@ -239,6 +239,7 @@ Examples:
 * `find m/fz michigan` returns `Elle Meyer` (address: `michegan ave`)
 * `find va/MONDAY,14:00,17:00` returns all volunteers available on Monday from 14:00 to 17:00
 * `find va/MONDAY,14:00,17:00 alice` returns volunteers matching `alice` who are also available on Monday from 14:00 to 17:00
+* `find va/MONDAY,14:00,17:00 alice bob` returns volunteers matching `alice` **or** `bob` who are **also** available on Monday from 14:00 to 17:00
 
 ### Viewing volunteer statistics : `stats`
 
