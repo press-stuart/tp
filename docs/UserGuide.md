@@ -63,7 +63,7 @@ If you're using a PDF version of this document, be careful when copying and past
 * Items with `…`​ after them can be used multiple times including zero times.<br>
   e.g. `[t/TAG]…​` can be used as ` ` (i.e. 0 times), `t/friend`, `t/friend t/family` etc.
 
-* Parameters can be in any order.<br>
+* Parameters can be in any order, **unless otherwise stated**.<br>
   e.g. if the command specifies `n/NAME p/PHONE`, `p/PHONE n/NAME` is also acceptable.
 
 * If you accidentally type extra text after commands that don't take parameters (such as `help`, `exit`, `clear`, `bin`, `aliases` and `editprev`), the extra text is simply ignored.<br>
@@ -223,6 +223,7 @@ Format: `find [m/MATCH_TYPE] [va/DAY,HH:mm,HH:mm] [KEYWORD [MORE_KEYWORDS]]`
 * `m/fz` (fuzzy) allows small spelling mistakes. Words that are up to 2 edits away (in terms of adding, removing, or changing a letter) can still match. e.g. `michigan` matches `michegan`
 * `va/DAY,HH:mm,HH:mm` filters for volunteers whose availability covers the specified time period, i.e. the volunteer's availability is on the same day, starts at or before the specified start time, and ends at or after the specified end time. See [field constraints](#field-constraints) for the `AVAILABILITY` format.
 * At least one of keywords or `va/` must be provided.
+* Keywords must appear after all prefixes (i.e., after `m/` and/or `va/`). For example, `find va/MONDAY,14:00,17:00 alice` is valid, but `find alice va/MONDAY,14:00,17:00` is not.
 * When both keywords and `va/` are provided, only volunteers matching at least one keyword **and** the availability filter are returned. Note that this means the search uses mixed logic: keywords are matched among themselves using `OR`, while the availability filter is applied on top as an additional `AND` condition.
 * If `m/MATCH_TYPE` is specified, at least one keyword must also be provided.
 * If you provide multiple keywords, volunteers matching **any** of them are shown (i.e. it's an `OR` search).
