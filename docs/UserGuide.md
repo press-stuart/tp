@@ -89,9 +89,7 @@ Any extra whitespaces at the start or end of a field value are automatically rem
 
 * **Name**: Letters, numbers, and spaces only. Must start with letters or numbers, and must not be blank.
 * **Phone**: At least 3 digits. May optionally start with a single `+` for international numbers (e.g. `+6591234567`).
-  * Phone numbers are stored exactly as entered and compared as plain strings, so `+6591234567` and `6591234567` are treated as different phone numbers (e.g. duplicate detection won't flag them as the same on the basis of phone alone).
-  * Sorting by phone number is character-by-character, not numeric: in `list phone asc` (ascending), `+`-prefixed entries appear before plain-digit ones; in `list phone desc` (descending), they appear after.
-  * Keyword find (`m/kw`) needs your search term to match the stored phone exactly, so the `+` must be included if the stored phone has one. Substring find (`m/ss`) matches any portion of the value, and fuzzy find (`m/fz`) tolerates up to 2 edits per word — both will match `6591234567` against a stored `+6591234567`.
+  * Phone numbers are stored exactly as entered and compared as plain strings, so `+6591234567` and `6591234567` are treated as different phone numbers (e.g. duplicate detection won't flag them as the same on the basis of phone alone). See the [`list`](#listing-all-volunteers--list) and [`find`](#finding-volunteers-by-keyword-find) commands for how the `+` prefix affects sorting and searching.
 * **Email**: Must be in `local-part@domain` format. The local-part is made up of alphanumeric chunks, optionally separated by single special characters (`+_.-`), and must start and end with an alphanumeric character. The domain is made up of one or more labels separated by periods. Each label must start and end with an alphanumeric character, may contain hyphens in between, and can't contain underscores. The last label must be at least 2 characters long. A single-label domain such as `localhost` is allowed.
 * **Address**: Any characters allowed, but must not be blank after trimming.
 * **Tag**: Letters and numbers only. Must not be blank.
@@ -140,6 +138,7 @@ Format: `list [ATTRIBUTE [asc|desc]]`
 * Currently supported `ATTRIBUTE`: `name`, `phone`, `email`, `role`, `tag`, or `vr`.
 * Order defaults to `asc` when omitted.
 * Omitting `ATTRIBUTE` shows the list in the default order.
+* `phone` sorts character-by-character (not numerically), so phones starting with `+` appear before plain-digit phones in `list phone asc` and after them in `list phone desc`.
 * `vr` sorts by the end time of each volunteer's most recent volunteer record. Use `list vr asc` to see who hasn't served recently (useful for distributing duties fairly), or `list vr desc` to see who served most recently.
   * Volunteers without any volunteer records are treated as least-recently served (i.e., they appear first when sorting in ascending order, so you can easily spot who hasn't served yet).
 
@@ -224,6 +223,7 @@ Format: `find [m/MATCH_TYPE] [va/DAY,HH:mm,HH:mm] [KEYWORD [MORE_KEYWORDS]]`
 * `m/kw` (keyword) matches full words only. e.g. `Han` doesn't match `Hans`
 * `m/ss` (substring) matches substrings (i.e., parts of words). e.g. `Han` matches `Hans`
 * `m/fz` (fuzzy) allows small spelling mistakes. Words that are up to 2 edits away (in terms of adding, removing, or changing a letter) can still match. e.g. `michigan` matches `michegan`
+* Phone numbers with a `+` prefix (e.g. `+6591234567`) are treated by `m/kw` as a distinct word from their plain-digit form, so a keyword search for `6591234567` won't match a stored `+6591234567`. Both `m/ss` and `m/fz` match `6591234567` against `+6591234567` (substring match / 1-edit distance).
 * `va/DAY,HH:mm,HH:mm` filters for volunteers whose availability covers the specified time period, i.e. the volunteer's availability is on the same day, starts at or before the specified start time, and ends at or after the specified end time. See [field constraints](#field-constraints) for the `AVAILABILITY` format.
 * At least one of keywords or `va/` must be provided.
 * When both keywords and `va/` are provided, only volunteers matching **both** the keyword search **and** the availability filter are returned.
