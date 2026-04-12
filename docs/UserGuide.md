@@ -137,6 +137,11 @@ Format: `list [ATTRIBUTE [asc|desc]]`
 * Currently supported `ATTRIBUTE`: `name`, `phone`, `email`, `role`, `tag`, or `vr`.
 * Order defaults to `asc` when omitted.
 * Omitting `ATTRIBUTE` shows the list in the default order.
+* `name` sorts alphabetically by the volunteer's name (case-insensitive).
+* `phone` sorts lexicographically by volunteer's phone number, not numerically (e.g., `100` appears before `20`, since `1` is lexicographically smaller than `2`).
+* `email` sorts alphabetically by the volunteer's email address (case-insensitive).
+* `role` sorts alphabetically by the volunteer's role (case-insensitive).
+* `tag` sorts alphabetically by each volunteer's tags (tags are first sorted among themselves, then combined). Volunteers with no tags appear first in ascending order.
 * `vr` sorts by the end time of each volunteer's most recent volunteer record. Use `list vr asc` to see who hasn't served recently (useful for distributing duties fairly), or `list vr desc` to see who served most recently.
   * Volunteers without any volunteer records are treated as least-recently served (i.e., they appear first when sorting in ascending order, so you can easily spot who hasn't served yet).
 
