@@ -404,7 +404,7 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 | `* *` | volunteer coordinator | delete multiple contacts in one command | manage large volunteer rosters efficiently |
 | `* *` | volunteer coordinator | restore recently deleted contacts | recover from accidental deletions |
 | `* *` | volunteer coordinator | view deleted contacts in a recycle bin | prevent irreversible mistakes |
-| `* *` | volunteer coordinator | sort contacts by name, phone, email, address or tag | organize my volunteer roster clearly |
+| `* *` | volunteer coordinator | sort contacts by name, phone, email, address, role or tag | organize my volunteer roster clearly |
 | `* *` | volunteer coordinator | export volunteer information to a CSV file | analyze volunteer data using external tools |
 | `* *` | volunteer coordinator | search across multiple fields (name, phone, email, address, role, notes, tags) | locate volunteers using any known detail |
 | `* *` | volunteer coordinator | search using multiple criteria | filter volunteers more precisely |
