@@ -234,7 +234,7 @@ Format: `find [m/MATCH_TYPE] [va/DAY,HH:mm,HH:mm] [SEARCH_TERM [MORE_SEARCH_TERM
     e.g. `Hans Bo` returns `Hans Gruber`, `Bo Yang`
 * **Match type (`m/MATCH_TYPE`):**
   * `MATCH_TYPE` is optional. If you don't specify one, keyword matching (`m/kw`) is used by default.
-  * Currently supported `MATCH_TYPE`: `kw`, `ss`, `fz`. Note that `MATCH_TYPE` is case-sensitive (e.g. `m/KW` is not valid).
+  * Currently supported `MATCH_TYPE`: `kw`, `ss`, `fz`. `MATCH_TYPE` is case-insensitive (e.g. `m/KW` works the same as `m/kw`).
   * If `m/MATCH_TYPE` is specified, at least one search term must also be provided.
   * `m/kw` (keyword) matches full words only. e.g. `Han` doesn't match `Hans`
   * `m/ss` (substring) matches substrings (i.e., parts of words). e.g. `Han` matches `Hans`

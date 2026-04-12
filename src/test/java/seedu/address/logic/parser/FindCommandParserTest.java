@@ -59,6 +59,21 @@ public class FindCommandParserTest {
     }
 
     @Test
+    public void parse_caseInsensitiveMatchType_returnsFindCommand() {
+        FindCommand expectedKeyword =
+                new FindCommand(new PersonContainsKeywordsPredicate(Arrays.asList("Alice")));
+        assertParseSuccess(parser, PREFIX_MATCH_TYPE + "KW Alice", expectedKeyword);
+
+        FindCommand expectedSubstring =
+                new FindCommand(new PersonContainsSubstringsPredicate(Arrays.asList("ali")));
+        assertParseSuccess(parser, PREFIX_MATCH_TYPE + "SS ali", expectedSubstring);
+
+        FindCommand expectedFuzzy =
+                new FindCommand(new PersonContainsFuzzyKeywordsPredicate(Arrays.asList("meyr")));
+        assertParseSuccess(parser, PREFIX_MATCH_TYPE + "Fz meyr", expectedFuzzy);
+    }
+
+    @Test
     public void parse_examplesFromDocumentation_returnsFindCommand() {
         // FindCommand MESSAGE_USAGE examples
         assertParseSuccess(parser, PREFIX_MATCH_TYPE + KEYWORD_TOKEN + " alice bob charlie",
