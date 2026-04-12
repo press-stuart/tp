@@ -115,7 +115,7 @@ public class MainWindow extends UiPart<Stage> {
      * Fills up all the placeholders of this window.
      */
     void fillInnerParts() {
-        personListPanel = new PersonListPanel(logic.getFilteredKeptPersonList());
+        personListPanel = new PersonListPanel(personListView.getDisplayMessage(), selectPersonList());
         personListPanelPlaceholder.getChildren().add(personListPanel.getRoot());
 
         resultDisplay = new ResultDisplay();
@@ -199,16 +199,19 @@ public class MainWindow extends UiPart<Stage> {
         }
     }
 
-    private void updatePersonListPanel() {
+    private ObservableList<Person> selectPersonList() {
         // Indented case blocks in lambda-style switch statements are allowed
         // CHECKSTYLE.OFF: Indentation
-        ObservableList<Person> personList = switch (personListView) {
+        return switch (personListView) {
             case KEPT_PERSONS -> logic.getFilteredKeptPersonList();
             case DELETED_PERSONS -> logic.getFilteredDeletedPersonList();
             default -> throw new IllegalStateException("Unexpected value of personListView: " + personListView);
         };
         // CHECKSTYLE.ON: Indentation
+    }
 
-        personListPanel.setPersonList(personList);
+    private void updatePersonListPanel() {
+        personListPanel.setPersonListStatus(personListView.getDisplayMessage());
+        personListPanel.setPersonList(selectPersonList());
     }
 }
