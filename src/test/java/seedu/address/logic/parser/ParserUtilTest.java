@@ -2,10 +2,13 @@ package seedu.address.logic.parser;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static seedu.address.logic.Messages.MESSAGE_INVALID_COMMAND_FORMAT;
 import static seedu.address.logic.parser.ParserUtil.MESSAGE_INVALID_INDEX;
 import static seedu.address.testutil.Assert.assertThrows;
 import static seedu.address.testutil.TypicalIndexes.INDEX_FIRST_PERSON;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -13,6 +16,7 @@ import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 
+import seedu.address.logic.commands.ExportCommand;
 import seedu.address.logic.parser.exceptions.ParseException;
 import seedu.address.model.person.Address;
 import seedu.address.model.person.Email;
@@ -24,7 +28,7 @@ import seedu.address.model.tag.Tag;
 
 public class ParserUtilTest {
     private static final String INVALID_NAME = "R@chel";
-    private static final String INVALID_PHONE = "+651234";
+    private static final String INVALID_PHONE = "+65a1234";
     private static final String INVALID_ADDRESS = " ";
     private static final String INVALID_EMAIL = "example.com";
     private static final String INVALID_TAG = "#friend";
@@ -33,6 +37,7 @@ public class ParserUtilTest {
 
     private static final String VALID_NAME = "Rachel Walker";
     private static final String VALID_PHONE = "123456";
+    private static final String VALID_PHONE_WITH_PLUS = "+6591234567";
     private static final String VALID_ADDRESS = "123 Main Street #0505";
     private static final String VALID_EMAIL = "rachel@example.com";
     private static final String VALID_TAG_1 = "friend";
@@ -85,6 +90,27 @@ public class ParserUtilTest {
     }
 
     @Test
+    public void parseFilePath_blankInput_throwsParseException() {
+        assertThrows(ParseException.class,
+                String.format(MESSAGE_INVALID_COMMAND_FORMAT,
+                    ExportCommand.MESSAGE_USAGE), () -> ParserUtil.parseFilePath(" \t ", ExportCommand.MESSAGE_USAGE));
+    }
+
+    @Test
+    public void parseFilePath_multipleTokens_throwsParseException() {
+        assertThrows(ParseException.class,
+                String.format(MESSAGE_INVALID_COMMAND_FORMAT,
+                    ExportCommand.MESSAGE_USAGE), () -> ParserUtil.parseFilePath("data/volunteers.csv extra",
+                    ExportCommand.MESSAGE_USAGE));
+    }
+
+    @Test
+    public void parseFilePath_singleToken_returnsPath() throws Exception {
+        Path expectedPath = Paths.get("data/volunteers.csv");
+        assertEquals(expectedPath, ParserUtil.parseFilePath(" data/volunteers.csv ", ExportCommand.MESSAGE_USAGE));
+    }
+
+    @Test
     public void parseName_null_throwsNullPointerException() {
         assertThrows(NullPointerException.class, () -> ParserUtil.parseName((String) null));
     }
@@ -127,6 +153,20 @@ public class ParserUtilTest {
     public void parsePhone_validValueWithWhitespace_returnsTrimmedPhone() throws Exception {
         String phoneWithWhitespace = WHITESPACE + VALID_PHONE + WHITESPACE;
         Phone expectedPhone = new Phone(VALID_PHONE);
+        assertEquals(expectedPhone, ParserUtil.parsePhone(phoneWithWhitespace));
+    }
+
+    @Test
+    public void parsePhone_validValueWithPlusPrefix_returnsPhone() throws Exception {
+        Phone expectedPhone = new Phone(VALID_PHONE_WITH_PLUS);
+        assertEquals(expectedPhone, ParserUtil.parsePhone(VALID_PHONE_WITH_PLUS));
+    }
+
+    @Test
+    public void parsePhone_validValueWithPlusPrefixAndWhitespace_returnsTrimmedPhone() throws Exception {
+        String phoneWithWhitespace = WHITESPACE + VALID_PHONE_WITH_PLUS + WHITESPACE;
+        Phone expectedPhone = new Phone(VALID_PHONE_WITH_PLUS);
+        // The '+' must survive trimming — only outer whitespace is removed.
         assertEquals(expectedPhone, ParserUtil.parsePhone(phoneWithWhitespace));
     }
 
