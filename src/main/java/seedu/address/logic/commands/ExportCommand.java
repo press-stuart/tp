@@ -23,9 +23,6 @@ import seedu.address.model.person.Person;
 public class ExportCommand extends Command {
 
     public static final String COMMAND_WORD = "export";
-    private static final DateTimeFormatter FILE_NAME_TIMESTAMP_FORMATTER =
-            DateTimeFormatter.ofPattern("yyyyMMdd'T'HHmmss");
-
     public static final String MESSAGE_USAGE = COMMAND_WORD
             + ": Exports kept volunteers to a CSV file. If FILE_PATH already exists, "
             + "a new file name will be generated automatically.\n"
@@ -40,6 +37,8 @@ public class ExportCommand extends Command {
     public static final String MESSAGE_SUCCESS_REDIRECTED =
             "Exported %1$d volunteers to %2$s because %3$s already exists.";
     public static final String MESSAGE_EXPORT_FAILURE = "Could not export to %1$s: %2$s";
+    private static final DateTimeFormatter FILE_NAME_TIMESTAMP_FORMATTER =
+            DateTimeFormatter.ofPattern("yyyyMMdd'T'HHmmss");
 
     private final Path filePath;
 
