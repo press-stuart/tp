@@ -832,3 +832,9 @@ testers are expected to do more *exploratory* testing.
 
    1. Re-launch the app.<br>
       Expected: The newly added person is still present in the contact list.
+
+## **Appendix: Planned Enhancements**
+
+Team size: 5
+
+1. **Display an error message when the user inputs duplicate indices.** The `delete` and `restore` commands accept multiple indices. Currently, if a user inputs duplicate indices in one command, the app will silently ignore duplicates. For example, `delete 1 2 2` is processed exactly the same as `delete 1 2`. This may lead to user confusion if they accidentally input duplicate indices. The app should detect this, block the execution of the command, and display an error message.
