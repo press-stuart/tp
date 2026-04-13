@@ -56,7 +56,7 @@ RosterBolt is designed around practical workflows around volunteer coordination.
 1. `list vr asc`
   - This sorts volunteers and surfaces those who have not served recently to the top.
 1. `find va/SATURDAY,09:00,12:00 usher`
-  - Note that [`find`](#finding-volunteers-by-keyword-find) can find keywords in any field, so searching "usher" is all it takes to find volunteers with the usher role!
+  - Note that [`find`](#finding-volunteers-by-keyword-find) can find keywords in searchable fields such as role, so searching "usher" is all it takes to find volunteers with the usher role!
 1. `edit 3 nt/Asked for Saturday usher shift; awaiting reply`
   - After contacting volunteers, you can update their records with notes for easy bookkeeping and coordination.
 
@@ -80,8 +80,8 @@ RosterBolt is designed around practical workflows around volunteer coordination.
 1. `f va/MONDAY,18:00,20:00 logistics`
   - This finds logistics volunteers available for that Monday evening slot.
 1. `editprev`
-  - RosterBolt loads the previous command (in its full form, e.g. `find va/MONDAY,18:00,20:00 logistics`) back into the command box for editing.
-1. Change the loaded command to `find va/MONDAY,20:00,22:00 logistics`, then press Enter.
+  - RosterBolt loads the previous command exactly as you typed it (e.g. `f va/MONDAY,18:00,20:00 logistics`) back into the command box for editing.
+1. Change the loaded command to `f va/MONDAY,20:00,22:00 logistics`, then press Enter.
   - This checks the very next slot without having to retype the whole command.
 
 --------------------------------------------------------------------------------------------------------------------
@@ -260,7 +260,7 @@ You can use this command while viewing either the working list or the recycle bi
 Format: `find [m/MATCH_TYPE] [va/DAY,HH:mm,HH:mm] [SEARCH_TERM [MORE_SEARCH_TERMS]]`
 
 * **Search terms:**
-  * The search covers **all fields other than availability**: name, phone, email, address, role, notes, and tags.
+  * The search covers **all fields other than availability and volunteer records**: name, phone, email, address, role, notes, and tags.
   * The search is case-insensitive. e.g. `hans` matches `Hans`
   * The order of the search terms doesn't matter. e.g. `Hans Bo` matches `Bo Hans`
   * If you provide multiple search terms, volunteers matching **any** of them are shown (i.e. it's an `OR` search).
