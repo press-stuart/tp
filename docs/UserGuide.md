@@ -88,7 +88,8 @@ Instead, please consider rephrasing the input to avoid the need for such abbrevi
 Any extra whitespaces at the start or end of a field value are automatically removed before validation. A field is considered blank if nothing remains after removing these spaces.
 
 * **Name**: Letters, numbers, and spaces only. Must start with letters or numbers, and must not be blank.
-* **Phone**: Numbers only, at least 3 digits.
+* **Phone**: At least 3 digits. May optionally start with a single `+` for international numbers (e.g. `+6591234567`).
+  * Phone numbers are stored exactly as entered and compared as plain strings, so `+6591234567` and `6591234567` are treated as different phone numbers (e.g. duplicate detection won't flag them as the same on the basis of phone alone). See the [`list`](#listing-all-volunteers--list) and [`find`](#finding-volunteers-by-keyword-find) commands for how the `+` prefix affects sorting and searching.
 * **Email**: Must be in `local-part@domain` format. The local-part is made up of alphanumeric chunks, optionally separated by single special characters (`+_.-`), and must start and end with an alphanumeric character. The domain is made up of one or more labels separated by periods. Each label must start and end with an alphanumeric character, may contain hyphens in between, and can't contain underscores. The last label must be at least 2 characters long. A single-label domain such as `localhost` is allowed.
 * **Address**: Any characters allowed, but must not be blank after trimming.
 * **Tag**: Letters and numbers only. Must not be blank.
@@ -142,7 +143,7 @@ Format: `list [ATTRIBUTE [asc|desc]]`
   * Order defaults to `asc` when omitted.
 * **Sort behavior per attribute:**
   * `name` sorts alphabetically by the volunteer's name (case-insensitive).
-  * `phone` sorts lexicographically by volunteer's phone number, not numerically (e.g., `100` appears before `20`, since `1` is lexicographically smaller than `2`).
+  * `phone` sorts lexicographically character-by-character (not numerically), so `100` appears before `20` and phones starting with `+` appear before plain-digit phones in `list phone asc` (and after them in `list phone desc`).
   * `email` sorts alphabetically by the volunteer's email address (case-insensitive).
   * `address` sorts alphabetically by the volunteer's address (case-insensitive).
   * `role` sorts alphabetically by the volunteer's role (case-insensitive).
@@ -241,6 +242,7 @@ Format: `find [m/MATCH_TYPE] [va/DAY,HH:mm,HH:mm] [SEARCH_TERM [MORE_SEARCH_TERM
   * `m/kw` (keyword) matches full words only. e.g. `Han` doesn't match `Hans`
   * `m/ss` (substring) matches substrings (i.e., parts of words). e.g. `Han` matches `Hans`
   * `m/fz` (fuzzy) allows small spelling mistakes. Words that are up to 2 edits away (in terms of adding, removing, or changing a letter) can still match. e.g. `michigan` matches `michegan`
+  * Phone numbers with a `+` prefix (e.g. `+6591234567`) are treated by `m/kw` as a distinct word from their plain-digit form, so a keyword search for `6591234567` won't match a stored `+6591234567`. Both `m/ss` and `m/fz` match `6591234567` against `+6591234567` (substring match / 1-edit distance).
 * **Availability filter (`va/`):**
   * `va/DAY,HH:mm,HH:mm` filters for volunteers whose availability covers the specified time period, i.e. the volunteer's availability is on the same day, starts at or before the specified start time, and ends at or after the specified end time.
   * See [field constraints](#field-constraints) for the `AVAILABILITY` format.
