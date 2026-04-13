@@ -171,6 +171,7 @@ Examples:
 * `add n/Betsy Crowe t/friend e/betsycrowe@example.com a/Newgate Prison p/1234567 t/criminal r/Logistics nt/Prefers morning shifts va/SATURDAY,09:00,12:00 va/SUNDAY,13:00,16:00`
 * `add n/Alex Tan p/91234567 e/alex@example.com a/NUS`
 
+<a id="listing-all-volunteers--list"></a>
 ### Listing all active volunteers : `list`
 
 Lists all active volunteers in your RosterBolt contact list, optionally sorted by a chosen attribute. This is useful for getting an overview of your roster or finding volunteers in a particular order.
@@ -205,7 +206,7 @@ Creates a custom shortcut (i.e., alias) for a built-in command. For example, if 
 Format: `alias SHORT COMMAND_WORD`
 
 * Your alias (`SHORT`) must start with a lowercase letter and contain only lowercase letters, numbers, or hyphens (like a command word).
-* `COMMAND_WORD` must be exactly one of the supported built-in commands: `add`, `bin`, `clear`, `delete`, `edit`, `exit`, `export`, `find`, `help`, `import`, `list`, `restore` or `stats`.
+* `COMMAND_WORD` must be exactly one allowed alias target command: `add`, `bin`, `clear`, `delete`, `edit`, `exit`, `export`, `find`, `help`, `import`, `list`, `restore` or `stats`.
 * When you use an alias, RosterBolt replaces only the alias with the full command word. Everything else you type after is kept as-is.
 * `alias`, `aliases`, `unalias`, and `editprev` can't be used as alias targets.
 * Your aliases are saved in your preferences file (`preferences.json`), and not in the volunteer data file, so they won't be lost if you clear or reset your roster.
@@ -223,9 +224,9 @@ Lists all the command aliases you've set up, so you can check what shortcuts are
 Format: `aliases`
 
 Examples:
-* `aliases` shows `No aliases defined.` if you haven't created any aliases yet.
-* `alias ls list` followed by `aliases` shows `ls -> list` in the alias list.
-* `alias rm delete` followed by `alias ls list`, then `aliases`, shows both aliases sorted by alias name.
+* With no aliases defined, `aliases` shows `No aliases defined.`.
+* `alias ls list` followed by `aliases` includes `ls -> list` in the alias list.
+* `alias f find` followed by `alias ls list`, then `aliases`, includes both aliases sorted by alias name.
 
 ### Removing a command alias : `unalias`
 
@@ -267,13 +268,15 @@ Format: `edit INDEX [n/NAME] [p/PHONE] [e/EMAIL] [a/ADDRESS] [r/ROLE] [nt/NOTES]
 * The values you provide replace the existing values for those fields.
 * When you edit tags, availabilities, or records, the new values **replace all existing values** for that field (i.e., they aren't added on top of the old ones).
 * You can remove all the volunteer's tags, availabilities, records, role, or notes by typing `t/`, `va/`, `vr/`, `r/`, or `nt/` without specifying values after the prefix.
-  * Repeated empty prefixes are accepted and still clear that field. For example, `edit 1 t/` and `edit 1 t/ t/` both clear all tags.
-  * Don't mix empty and non-empty values for the same prefix. For example, `edit 1 t/friend t/` is not accepted because the new tags are mutually contradictory.
+  * For tags, availabilities, and records, repeated empty prefixes are accepted and still clear that field. For example, `edit 1 t/` and `edit 1 t/ t/` both clear all tags.
+  * For tags, don't mix empty and non-empty values for the same prefix. For example, `edit 1 t/friend t/` is not accepted because the new tags are mutually contradictory.
 * See [field constraints](#field-constraints) for valid values for each field.
 
 Examples:
 *  `edit 1 p/91234567 e/johndoe@example.com va/MONDAY,18:00,20:00` Edits the phone number, email address, and availability of the 1st volunteer.
 *  `edit 2 n/Betsy Crower t/ va/ vr/` Edits the name of the 2nd volunteer and clears all existing tags, availabilities, and records.
+
+<a id="finding-volunteers-by-keyword-find"></a>
 
 ### Finding volunteers: `find`
 
@@ -351,11 +354,15 @@ Format: `delete INDEX [MORE_INDICES]`
 Examples:
 * `list` followed by `delete 2 3` deletes the 2nd and 3rd volunteers in RosterBolt.
 * `list` followed by `delete 3 3 2` has the same behavior, as duplicate indices are ignored and the order of indices doesn't matter.
-* `find Betsy` followed by `delete 1` deletes the 1st volunteer in the results of the `find` command.
+* If Betsy appears as the 1st volunteer after `find Betsy`, `delete 1` deletes that volunteer from the results of the `find` command.
 
+<a id="restoring-a-deleted-volunteer--restore"></a>
 ### Restoring a deleted volunteer : `restore`
 
 Restores volunteers that were previously deleted in the current session, recovering them from the recycle bin.
+
+The volunteer will be added to the **end** of your contact list with all
+original information intact (assuming no duplicate entries are found, see below).
 
 You must be viewing the recycle bin to use this command. Otherwise, you'll see an error message and no volunteers will be restored.
 
@@ -372,6 +379,7 @@ Format: `restore INDEX [MORE_INDICES]`
 Examples:
 * `bin` followed by `restore 2 3` restores the 2nd and 3rd volunteers in the recycle bin.
 * `bin` followed by `restore 3 3 2` has the same behavior, as duplicate indices are ignored and the order of indices doesn't matter.
+* If the volunteer you want to recover appears as the 1st entry in the recycle bin, `bin` followed by `restore 1` restores that volunteer.
 * `list` followed by `restore 1` is rejected with `You must be viewing the recycle bin of recently deleted contacts to perform this command.`
 * If the 1st volunteer in the recycle bin has the same phone number or email as someone in the active list, `bin` followed by `restore 1` is rejected with `A person that you want to restore is already in the address book.`
 * If the 1st and 2nd volunteers in the recycle bin share the same phone number or email, `bin` followed by `restore 1 2` is rejected with `Two people that you want to restore have the same identity.`
@@ -395,7 +403,7 @@ Format: `import FILE_PATH`
   * This is especially important for the optional structured fields `availabilities` and `records`.
   * `availabilities` values use the format `DAY,HH:mm,HH:mm`, so a valid CSV cell looks like `"MONDAY,09:00,12:00"`.
   * `records` values use the format `yyyy-MM-ddTHH:mm,yyyy-MM-ddTHH:mm`, so a valid CSV cell looks like `"2026-04-01T09:00,2026-04-01T12:00"`.
-  * Blank `availabilities` and `records` fields are allowed. An empty cell, without `""`, meaning that the volunteer has no availabilities or records for that field, is allowed.
+  * Blank `availabilities` and `records` fields are allowed. An empty cell without `""` means that the volunteer has no availabilities or records for that field.
   * CSV files exported by RosterBolt already use the correct format and can be imported back directly.
 * If the file can't be found or read, the import fails, and you'll see an error message.
 * Values in each column must conform to the [field constraints](#field-constraints).
@@ -431,7 +439,7 @@ Bob Lim,92345678,bob@example.com,NUS,MONDAY,09:00,12:00,2026-04-01T09:00,2026-04
 
 ### Exporting volunteers to a CSV file : `export`
 
-Exports all your active volunteers to a CSV (spreadsheet) file. This is useful for creating backups, sharing your roster with others, or working with the data in spreadsheet software like Excel or Google Sheets.
+Exports active volunteer data to a CSV (spreadsheet) file. This is useful for creating backups, sharing your roster with others, or working with the data in spreadsheet software like Excel or Google Sheets.
 
 When you are viewing the contact list, RosterBolt exports the contacts currently displayed on screen. This means any active `find` filter is respected.
 
@@ -449,7 +457,7 @@ Format: `export FILE_PATH`
 * If a file already exists at the given path, it's overwritten without warning, so double-check the path to avoid accidentally replacing an important file.
 
 Examples:
-* `export backups/event-a.csv` creates the `backups` folder if needed and exports the active volunteers there.
+* `export backups/event-a.csv` creates the `backups` folder if needed and exports the currently displayed active volunteers there.
 * `export data/volunteers.csv` overwrites `data/volunteers.csv` if it already exists.
 
 ### Clearing all entries : `clear`
@@ -465,7 +473,7 @@ Format: `clear`
 Examples:
 * `list` followed by `clear` moves every active volunteer into the recycle bin and leaves the active list empty.
 * `clear` followed by `bin` lets you review the cleared volunteers and restore any that were removed by mistake.
-* `bin` followed by `clear` is rejected with `You must be viewing the working list of kept contacts to perform this command.`
+* `bin` followed by `clear` is rejected with `You must be viewing the contact list of active volunteers to perform this command.`
 
 ### Exiting the program : `exit`
 
@@ -475,7 +483,7 @@ Format: `exit`
 
 Examples:
 * `exit` closes RosterBolt after saving your active volunteer data.
-* `delete 1` followed by `exit` closes RosterBolt and clears the recycle bin, so restore the volunteer first if the deletion was a mistake.
+* `find Alex` followed by `exit` closes RosterBolt after saving your active volunteer data.
 
 ### Editing the previous command : `editprev`
 
@@ -489,8 +497,8 @@ Format: `editprev`
 
 Examples:
 * `list` followed by `editprev` loads `list` back into the command box.
-* `delete 1` followed by `editprev` loads `delete 1` back into the command box for editing.
-* `alias rm delete` followed by `rm 1` and then `editprev` loads `rm 1`, not `delete 1`, because RosterBolt remembers what you typed.
+* `find Betsy` followed by `editprev` loads `find Betsy` back into the command box for editing.
+* `alias f find` followed by `f Betsy` and then `editprev` loads `f Betsy`, not `find Betsy`, because RosterBolt remembers what you typed.
 * Running `editprev` before any successful command is rejected with `There is no previous command to edit.`
 
 ### Saving the data

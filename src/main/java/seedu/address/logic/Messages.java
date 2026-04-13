@@ -21,7 +21,7 @@ public class Messages {
     public static final String MESSAGE_DUPLICATE_FIELDS =
             "Multiple values specified for the following single-valued field(s): ";
     public static final String MESSAGE_NOT_VIEWING_KEPT_PERSONS =
-            "You must be viewing the working list of kept contacts to perform this command.";
+            "You must be viewing the contact list of active volunteers to perform this command.";
     public static final String MESSAGE_NOT_VIEWING_DELETED_PERSONS =
             "You must be viewing the recycle bin of recently deleted contacts to perform this command.";
 
