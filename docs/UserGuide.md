@@ -427,7 +427,7 @@ Format: `export FILE_PATH`
 * Exactly one file path must be provided after `export`.
 * Any extra text after the file path will cause the command to be rejected as invalid.
 * File paths with spaces are not supported.
-* If a file already exists at the given path, it's overwritten without warning, so double-check the path to avoid accidentally replacing an important file.
+* If a file already exists at the specified path, it will be overwritten. Double-check the file path before running the command.
 
 Examples:
 * `export data/volunteers.csv`
@@ -507,7 +507,7 @@ Action | Format, Examples
 **Delete** | `delete INDEX [MORE_INDICES]`<br> e.g., `delete 2 3`
 **Edit** | `edit INDEX [n/NAME] [p/PHONE] [e/EMAIL] [a/ADDRESS] [r/ROLE] [nt/NOTES] [t/TAG]…​ [va/AVAILABILITY]…​ [vr/RECORD]…​`<br> e.g., `edit 2 n/James Lee e/jameslee@example.com va/MONDAY,14:00,17:00`
 **Edit Previous** | `editprev`
-**Export** | `export FILE_PATH`<br> Exports displayed active contacts; from recycle bin, exports active contacts and returns to contact list.<br> e.g., `export data/volunteers.csv`
+**Export** | `export FILE_PATH`<br> Exports displayed active contacts; from recycle bin, exports active contacts and returns to contact list. If `FILE_PATH` already exists, it will be overwritten.<br> e.g., `export data/volunteers.csv`
 **Find** | `find [m/MATCH_TYPE] [va/DAY,HH:mm,HH:mm] [SEARCH_TERM [MORE_SEARCH_TERMS]]`<br> e.g., `find m/kw James Jake`, `find m/ss ali`, `find m/fz michigan`, `find va/MONDAY,14:00,17:00`, `find va/MONDAY,14:00,17:00 alice`
 **Import** | `import FILE_PATH`<br> e.g., `import data/volunteers.csv`
 **List** | `list [ATTRIBUTE [asc｜desc]]`<br> e.g., `list name desc`, `list vr desc`

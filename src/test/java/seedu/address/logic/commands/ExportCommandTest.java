@@ -152,7 +152,7 @@ public class ExportCommandTest {
 
         CommandResult result = command.execute(model, PersonListView.KEPT_PERSONS);
 
-        assertEquals(String.format(ExportCommand.MESSAGE_SUCCESS, 1, outputFile),
+        assertEquals(String.format(ExportCommand.MESSAGE_SUCCESS_OVERWRITE, 1, outputFile),
                 result.getFeedbackToUser());
         assertEquals(PersonListView.KEPT_PERSONS, result.getPersonListView());
 
@@ -160,6 +160,19 @@ public class ExportCommandTest {
         assertTrue(content.contains("name,phone,email,address,role,notes,tags,availabilities,records"));
         assertTrue(content.contains("Alice Pauline"));
         assertTrue(!content.contains("old content"));
+    }
+
+    @Test
+    public void messageUsage_mentionsExistingFilesAreOverwritten() {
+        assertEquals("export: Exports kept volunteers to a CSV file. "
+                        + "If FILE_PATH already exists, it will be overwritten.\n"
+                        + "When viewing the contact list, exports the currently displayed kept contacts, "
+                        + "so active find filters are applied.\n"
+                        + "When viewing the recycle bin, exports the full kept contact list instead; "
+                        + "deleted contacts are never exported and the view switches back to the contact list.\n"
+                        + "Parameters: FILE_PATH\n"
+                        + "Example: export data/volunteers.csv",
+                ExportCommand.MESSAGE_USAGE);
     }
 
     @Test

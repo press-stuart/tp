@@ -3,6 +3,7 @@ package seedu.address.logic.commands;
 import static java.util.Objects.requireNonNull;
 
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 
@@ -21,7 +22,7 @@ public class ExportCommand extends Command {
     public static final String COMMAND_WORD = "export";
 
     public static final String MESSAGE_USAGE = COMMAND_WORD
-            + ": Exports kept volunteers to a CSV file.\n"
+            + ": Exports kept volunteers to a CSV file. If FILE_PATH already exists, it will be overwritten.\n"
             + "When viewing the contact list, exports the currently displayed kept contacts, "
             + "so active find filters are applied.\n"
             + "When viewing the recycle bin, exports the full kept contact list instead; "
@@ -30,6 +31,8 @@ public class ExportCommand extends Command {
             + "Example: " + COMMAND_WORD + " data/volunteers.csv";
 
     public static final String MESSAGE_SUCCESS = "Exported %1$d volunteers to %2$s";
+    public static final String MESSAGE_SUCCESS_OVERWRITE =
+            "Exported %1$d volunteers to %2$s. Existing file was overwritten.";
     public static final String MESSAGE_EXPORT_FAILURE = "Could not export to %1$s: %2$s";
 
     private final Path filePath;
@@ -53,6 +56,7 @@ public class ExportCommand extends Command {
                 ? model.getKeptPersonList()
                 : model.getFilteredKeptPersonList();
         PersonListView resultView = isViewingDeletedPersons ? PersonListView.KEPT_PERSONS : personListView;
+        boolean fileExistsBeforeWrite = Files.exists(filePath);
 
         try {
             CsvWriterUtil.writePersons(filePath, persons);
@@ -61,7 +65,8 @@ public class ExportCommand extends Command {
         }
 
         return new CommandResult(
-                String.format(MESSAGE_SUCCESS, persons.size(), filePath),
+                String.format(fileExistsBeforeWrite ? MESSAGE_SUCCESS_OVERWRITE : MESSAGE_SUCCESS,
+                        persons.size(), filePath),
                 resultView);
     }
 
