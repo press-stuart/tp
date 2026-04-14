@@ -40,6 +40,9 @@ package Model {
 AddressBookParser ..> ExportCommandParser
 AddressBookParser ..> ImportCommandParser
 
+ExportCommandParser ..> ParserUtil
+ImportCommandParser ..> ParserUtil
+
 ExportCommandParser --|> ExportCommandParserType
 ImportCommandParser --|> ImportCommandParserType
 
@@ -54,6 +57,7 @@ ExportCommand ..> CsvWriterUtil
 ImportCommand ..> CsvReaderUtil
 ImportCommand ..> CsvImportRowSuccess
 ImportCommand ..> CsvImportRowError
+ImportCommand ..> CsvImportFileResult
 
 CsvWriterUtil ..> Person
 
